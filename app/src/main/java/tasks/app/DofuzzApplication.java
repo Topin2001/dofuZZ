@@ -33,13 +33,20 @@ public class DofuzzApplication implements CommandLineRunner {
 
     List<String> list = Arrays.asList(strings);
     if (list.contains("install")) {
-        jdbcTemplate.execute("DROP TABLE players IF EXISTS");
-        jdbcTemplate.execute("DROP TABLE games IF EXISTS");
+      jdbcTemplate.execute("DROP TABLE players IF EXISTS");
+      jdbcTemplate.execute("DROP TABLE games IF EXISTS");
+      jdbcTemplate.execute("DROP TABLE spells IF EXISTS");
+      
+      jdbcTemplate.execute("CREATE TABLE players(" +
+              "id SERIAL, player_name VARCHAR(255), posX INTEGER, posY INTEGER, creation_date TIMESTAMP)");
+      jdbcTemplate.execute("CREATE TABLE games(" +
+              "id SERIAL, game_code VARCHAR(255), creation_date TIMESTAMP)");
+      jdbcTemplate.execute("CREATE TABLE spells(" +
+              "id SERIAL, spell_name VARCHAR(255), damage INTEGER, cost INTEGER)");
 
-        jdbcTemplate.execute("CREATE TABLE players(" +
-                "id SERIAL, player_name VARCHAR(255), posX INTEGER, posY INTEGER, creation_date TIMESTAMP)");
-        jdbcTemplate.execute("CREATE TABLE games(" +
-                "id SERIAL, code VARCHAR(255), creation_date TIMESTAMP, player1_id INTEGER, player2_id INTEGER, nb_turns INTEGER)");
-    }
+      jdbcTemplate.update("INSERT INTO spells(spell_name, damage, cost) VALUES(?, ?, ?)", "Fireball", 10, 5);
+      jdbcTemplate.update("INSERT INTO spells(spell_name, damage, cost) VALUES(?, ?, ?)", "Forst", 5, 3);
+
+  }
   }
 }
