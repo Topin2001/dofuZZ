@@ -6,6 +6,7 @@ import org.springframework.boot.CommandLineRunner;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.context.annotation.ComponentScan;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+@ComponentScan
 @SpringBootApplication
 public class DofuzzApplication implements CommandLineRunner {
 

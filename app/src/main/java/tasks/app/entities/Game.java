@@ -6,10 +6,13 @@ import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import java.util.List;
+import java.util.ArrayList;
 
 @Entity
 @Table(name="games") 
 public class Game {
+
 
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -67,5 +70,24 @@ public class Game {
     }
     public void setNb_turns(int nb_turns){
         this.nb_turns = nb_turns;
+    }
+    public void addPlayer(Player player){
+        if (this.player1_id == null){
+            this.player1_id = player.getId();
+        } else if (this.player2_id == null){
+            this.player2_id = player.getId();
+        }
+    }
+
+    // getPlayers
+    public List<Long> getPlayers(){
+        List<Long> players = new ArrayList<Long>();
+        if (this.player1_id != null){
+            players.add(this.player1_id);
+        }
+        if (this.player2_id != null){
+            players.add(this.player2_id);
+        }
+        return players;
     }
 }   
