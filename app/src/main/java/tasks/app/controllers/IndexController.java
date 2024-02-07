@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.ui.Model;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 
 import app.entities.Game;
 import app.entities.Player;
@@ -21,17 +23,15 @@ public class IndexController {
   private GameRepository gameRepository;
 
   @GetMapping(path={"/", "/games"})
-  public String  getAllTasks(Model model) {
-    model.addAttribute("games", gameRepository.findAll());
-    return "index"; 
+  public ResponseEntity<?> getAllGames(Model model) {
+    return ResponseEntity.ok().body(gameRepository.findAll());
   }
 
-    //  Les données seront tirées d'un formulaire
   @PostMapping(path="/games")
-  public String  nouveau(@RequestParam String code) {
+  public ResponseEntity<?> addNewGame(@RequestParam String code) {
     Game game = new Game(code);
     gameRepository.save(game);
 
-    return "index"; 
+    return ResponseEntity.status(HttpStatus.CREATED).build();
   }
 }

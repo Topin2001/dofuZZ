@@ -37,7 +37,7 @@ public class DofuzzApplication implements CommandLineRunner {
         jdbcTemplate.execute("CREATE TABLE players(" +
                 "id SERIAL, player_name VARCHAR(255), posX INTEGER, posY INTEGER, creation_date TIMESTAMP)");
         jdbcTemplate.execute("CREATE TABLE games(" +
-                "id SERIAL, game_code VARCHAR(255), creation_date TIMESTAMP)");
+                "id SERIAL, code VARCHAR(255), creation_date TIMESTAMP, player1_id INTEGER, player2_id INTEGER, nb_turns INTEGER)");
     }
   }
 }
