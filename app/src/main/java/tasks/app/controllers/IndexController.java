@@ -17,20 +17,20 @@ import app.repositories.TaskRepository;
 public class IndexController {
   
   @Autowired 
-  private TaskRepository taskRepository;
+  private GameRepository gameRepository;
 
-  @GetMapping(path={"/", "/tasks"})
+  @GetMapping(path={"/", "/games"})
   public String  getAllTasks(Model model) {
-    model.addAttribute("tasks", taskRepository.findAll());
-    return "tasks"; 
+    model.addAttribute("games", taskRepository.findAll());
+    return "index"; 
   }
 
     //  Les données seront tirées d'un formulaire
-  @PostMapping(path="/tasks")
-  public String  nouveau(@RequestParam String content,@RequestParam Category category) {
-    Task task = new Task(category, content);
-    taskRepository.save(task);
+  @PostMapping(path="/games")
+  public String  nouveau(@RequestParam String code) {
+    Game game = new Game(code);
+    gameRepository.save(game);
 
-    return "redirect:/tasks"; 
+    return "index"; 
   }
 }

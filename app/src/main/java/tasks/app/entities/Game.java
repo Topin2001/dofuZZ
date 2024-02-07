@@ -8,25 +8,25 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
-@Table(name="categories") 
+@Table(name="games") 
 public class Category {
 
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
-    @Column(name="category_id")
+    @Column(name="game_id")
     private Long id;
-    private String name;
+    private String code;
 
-    protected Category() {}
+    protected Game() {}
 
-    public Category(String name) {
-        this.name = name;
+    public Game(String code) {
+        this.code = code;
     }
 
     @Override
     public String toString() {
         return String.format(
-                "Category[id=%d, name='%s']", id, name);
+                "Game[id=%d, code='%s']", id, code);
     }
 
   // il va falloir mettre les getters/setters
@@ -36,10 +36,10 @@ public class Category {
     public void setId(Long id) {
         this.id = id;
     }
-    public String getName(){
-        return name;
+    public String getCode(){
+        return code;
     }
-    public void setName(String name){
-        this.name = name;
+    public void setCode(String code){
+        this.code = code;
     }
 }   

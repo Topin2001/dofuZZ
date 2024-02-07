@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @SpringBootApplication
-public class TasksApplication implements CommandLineRunner {
+public class DofuzzApplication implements CommandLineRunner {
 
   private static final Logger log = LoggerFactory.getLogger(TasksApplication.class);
   
@@ -31,9 +31,9 @@ public class TasksApplication implements CommandLineRunner {
 
     List<String> list = Arrays.asList(strings);
     if (list.contains("install")) {
-        jdbcTemplate.execute("DROP TABLE tasks IF EXISTS");
-        jdbcTemplate.execute("DROP TABLE categories IF EXISTS");
-        jdbcTemplate.execute("CREATE TABLE categories ("+
+        jdbcTemplate.execute("DROP TABLE players IF EXISTS");
+        jdbcTemplate.execute("DROP TABLE games IF EXISTS");
+        jdbcTemplate.execute("CREATE TABLE games ("+
             "category_id IDENTITY PRIMARY KEY," +
             "name VARCHAR(20) DEFAULT '' "+
             ");" );
