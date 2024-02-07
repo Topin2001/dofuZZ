@@ -15,7 +15,14 @@ public class Category {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="game_id")
     private Long id;
+    @Column(name="code")
     private String code;
+    @Column(name="player1_id")
+    private Long player1_id;
+    @Column(name="player2_id")
+    private Long player2_id;
+    @Column(name="nb_turns")
+    private int nb_turns;
 
     protected Game() {}
 
@@ -41,5 +48,23 @@ public class Category {
     }
     public void setCode(String code){
         this.code = code;
+    }
+    public Long getPlayer1_id(){
+        return player1_id;
+    }
+    public void setPlayer1_id(Long player1_id){
+        this.player1_id = player1_id;
+    }
+    public Long getPlayer2_id(){
+        return player2_id;
+    }
+    public void setPlayer2_id(Long player2_id){
+        this.player2_id = player2_id;
+    }
+    public int getNb_turns(){
+        return nb_turns;
+    }
+    public void setNb_turns(int nb_turns){
+        this.nb_turns = nb_turns;
     }
 }   

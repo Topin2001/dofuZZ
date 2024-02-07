@@ -34,7 +34,7 @@ public class DofuzzApplication implements CommandLineRunner {
         jdbcTemplate.execute("DROP TABLE players IF EXISTS");
         jdbcTemplate.execute("DROP TABLE games IF EXISTS");
         jdbcTemplate.execute("CREATE TABLE games ("+
-            "category_id IDENTITY PRIMARY KEY," +
+            "game_id IDENTITY PRIMARY KEY," +
             "name VARCHAR(20) DEFAULT '' "+
             ");" );
         log.info("categories TABLE CREATED");
