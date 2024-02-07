@@ -25,10 +25,10 @@ public class Player {
     @Column(name="player_name")
     private String name;
     
-    @ManyToOne
-    private Int  posX;
-    @ManyToOne
-    private Int  posY;
+    @Column(name="posX")
+    private int  posX;
+    @Column(name="posY")
+    private int  posY;
     @Column(name="creation_date")
     @CreationTimestamp
     private Date   creationDate;
@@ -55,22 +55,22 @@ public class Player {
     public void setId(Long id) {
         this.id = id;
     }
-    public Category getName(){
+    public String getName(){
         return name;
     }
     public void setName(String name){
         this.name = name;
     }
-    public Int getPosX(){
+    public int getPosX(){
         return posX;
     }
-    public void setPosX(Int posX){
+    public void setPosX(int posX){
         this.posX = posX;
     }
-    public Int getPosY(){
+    public int getPosY(){
         return posY;
     }
-    public void setPosY(Int posY){
+    public void setPosY(int posY){
         this.posY = posY;
     }
     public Date getCreationDate(){

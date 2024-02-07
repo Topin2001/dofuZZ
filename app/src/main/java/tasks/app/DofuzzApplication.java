@@ -17,13 +17,13 @@ import java.util.Map;
 @SpringBootApplication
 public class DofuzzApplication implements CommandLineRunner {
 
-  private static final Logger log = LoggerFactory.getLogger(TasksApplication.class);
+  private static final Logger log = LoggerFactory.getLogger(DofuzzApplication.class);
   
   @Autowired
   JdbcTemplate jdbcTemplate;
 
   public static void main(String[] args) {
-    SpringApplication.run(TasksApplication.class, args);
+    SpringApplication.run(DofuzzApplication.class, args);
   }
 
   @Override
@@ -33,34 +33,11 @@ public class DofuzzApplication implements CommandLineRunner {
     if (list.contains("install")) {
         jdbcTemplate.execute("DROP TABLE players IF EXISTS");
         jdbcTemplate.execute("DROP TABLE games IF EXISTS");
-        jdbcTemplate.execute("CREATE TABLE games ("+
-            "game_id IDENTITY PRIMARY KEY," +
-            "name VARCHAR(20) DEFAULT '' "+
-            ");" );
-        log.info("categories TABLE CREATED");
-            
-        jdbcTemplate.update("INSERT INTO categories(name) values('todo'); ");
-        jdbcTemplate.update("INSERT INTO categories(name) values('wip');  ");
-        jdbcTemplate.update("INSERT INTO categories(name) values('done'); ");
-        log.info("categories TABLE POPULATED");
 
-        jdbcTemplate.execute(
-        "CREATE TABLE tasks (" +
-        "   task_id       IDENTITY PRIMARY KEY," +
-        "   category      INTEGER NOT NULL," +
-        "   content       VARCHAR(500) NOT NULL," +
-        "   creation_date DATE DEFAULT CURRENT_DATE(), " +
-        "   end_date      DATE DEFAULT NULL, " +
-        "   FOREIGN KEY(category) REFERENCES categories(category_id)"+
-        ");");
-        log.info("tasks TABLE CREATED");
-            
-        jdbcTemplate.update("INSERT INTO tasks (category, content) values(3, 'finir le tp 1'); ");
-        jdbcTemplate.update("INSERT INTO tasks (category, content) values(2, 'finir le tp 2'); ");
-        jdbcTemplate.update("INSERT INTO tasks (category, content) values(1, 'finir le tp 3'); ");
-        jdbcTemplate.update("INSERT INTO tasks (category, content) values(1, 'finir le tp 3'); ");
-        log.info("tasks TABLE POPULATED");
-
+        jdbcTemplate.execute("CREATE TABLE players(" +
+                "id SERIAL, player_name VARCHAR(255), posX INTEGER, posY INTEGER, creation_date TIMESTAMP)");
+        jdbcTemplate.execute("CREATE TABLE games(" +
+                "id SERIAL, game_code VARCHAR(255), creation_date TIMESTAMP)");
     }
   }
 }

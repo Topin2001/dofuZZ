@@ -9,7 +9,7 @@ import jakarta.persistence.Id;
 
 @Entity
 @Table(name="games") 
-public class Category {
+public class Game {
 
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -23,6 +23,7 @@ public class Category {
     private Long player2_id;
     @Column(name="nb_turns")
     private int nb_turns;
+
 
     protected Game() {}
 

@@ -9,9 +9,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.ui.Model;
 
-import app.entities.Task;
-import app.entities.Category;
-import app.repositories.TaskRepository;
+import app.entities.Game;
+import app.entities.Player;
+import app.repositories.PlayerRepository;
+import app.repositories.GameRepository;
 
 @Controller    
 public class IndexController {
@@ -21,7 +22,7 @@ public class IndexController {
 
   @GetMapping(path={"/", "/games"})
   public String  getAllTasks(Model model) {
-    model.addAttribute("games", taskRepository.findAll());
+    model.addAttribute("games", gameRepository.findAll());
     return "index"; 
   }
 
