@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Liste des tâches (task)à</title>
+</head>
+<body>
+
+<h1>Tâches à faire</h1>
+
+<div th:each="t : ${tasks}" th:unless="${tasks.isEmpty()}" >
+  <div th:text="${t.category.name}"></div>
+  <div th:text="${t.content}"></div>
+  <div th:text="${t.creationDate}"></div>
+  <div th:text="${t.endDate}"></div>
+</div>
+
+</body>
+</html>
