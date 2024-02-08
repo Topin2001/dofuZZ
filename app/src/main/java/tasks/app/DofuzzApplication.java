@@ -36,6 +36,7 @@ public class DofuzzApplication implements CommandLineRunner {
       jdbcTemplate.execute("DROP TABLE players IF EXISTS");
       jdbcTemplate.execute("DROP TABLE games IF EXISTS");
       jdbcTemplate.execute("DROP TABLE spells IF EXISTS");
+      jdbcTemplate.execute("DROP TABLE tokens IF EXISTS");
       
       jdbcTemplate.execute("CREATE TABLE players(" +
               "id SERIAL, player_name VARCHAR(255), posX INTEGER, posY INTEGER, creation_date TIMESTAMP)");
@@ -43,6 +44,8 @@ public class DofuzzApplication implements CommandLineRunner {
               "id SERIAL, game_code VARCHAR(255), creation_date TIMESTAMP)");
       jdbcTemplate.execute("CREATE TABLE spells(" +
               "id SERIAL, spell_name VARCHAR(255), damage INTEGER, cost INTEGER)");
+      jdbcTemplate.execute("CREATE TABLE tokens(" +
+              "token_id SERIAL, token VARCHAR(255))");
 
       jdbcTemplate.update("INSERT INTO spells(spell_name, damage, cost) VALUES(?, ?, ?)", "Fireball", 10, 5);
       jdbcTemplate.update("INSERT INTO spells(spell_name, damage, cost) VALUES(?, ?, ?)", "Forst", 5, 3);
