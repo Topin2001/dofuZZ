@@ -2,6 +2,7 @@ package app.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,7 +25,8 @@ public class IndexController {
 
   @Autowired
   private PlayerRepository playerRepository;
-
+ 
+  @CrossOrigin
   @GetMapping(path={"/", "/games"})
   public ResponseEntity<?> getAllGames(Model model) {
     return ResponseEntity.ok().body(gameRepository.findAll());
