@@ -8,16 +8,11 @@ import { useState, useEffect } from 'react';
 
 
 function JoinGame(props) {
-    const [username, setUsername] = useState('');
     const [gameid, setGameId] = useState('');
     const [isGameStarted, setIsGameStarted] = useState(false);
 
     function handleGameIDChange(event) {
         setGameId(event.target.value);
-    }
-
-    function handleUsernameChange(event) {
-        setUsername(event.target.value);
     }
 
     function joinGame(event) {
@@ -26,25 +21,26 @@ function JoinGame(props) {
 
         const url = props.backendUrl + '/api/game/' + gameid + '?playerId=2';
         console.log(url)
-        // fetch(url, {
-        //     method: 'PUT',
-        //     headers: {
-        //         'Content-Type': 'application/json'
-        //     }
-        // })
-        //     .then(async response => {
-        //         if (response.ok) {
-        //             props.gameIdCallBack(gameid);
-        //             props.playerIdCallBack(2);
-        //         }
-        //         else {
-        //             const message = await response.text();
-        //             throw new Error(message);
-        //         }
-        //     })
-        //     .catch(error => {
-        //         alert(error);
-        //     });  
+        fetch(url, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            
+        })
+            .then(async response => {
+                if (response.ok) {
+                    props.gameIdCallBack(gameid);
+                    props.playerIdCallBack(2);
+                }
+                else {
+                    const message = await response.text();
+                    throw new Error(message);
+                }
+            })
+            .catch(error => {
+                alert(error);
+            });  
         // REMOVE AFTER TESTING
         props.gameIdCallBack(gameid);
         props.playerIdCallBack(2);
@@ -58,7 +54,7 @@ function JoinGame(props) {
                 </button>
             </div>
             <div className="Title">
-                <h1>SPATIAL WAR</h1>
+                <h1>DofuZZ</h1>
             </div>
             <div className="JoinGameForm">
                 <form /*onSubmit={this.handleSubmit}*/>
@@ -74,14 +70,7 @@ function JoinGame(props) {
                     <br />
                     <label>
                         <input type="text"
-                            placeholder='Username'
-                            value={username}
-                            onChange={handleUsernameChange} />
-                    </label>
-                    <br />
-                    <label>
-                        <input type="text"
-                            placeholder='GameId'
+                            placeholder='code'
                             value={gameid}
                             onChange={handleGameIDChange} />
                     </label>

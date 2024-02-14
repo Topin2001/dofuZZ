@@ -17,6 +17,7 @@ import app.entities.Player;
 import app.repositories.PlayerRepository;
 import app.repositories.GameRepository;
 
+@CrossOrigin
 @Controller    
 public class IndexController {
   
@@ -26,7 +27,6 @@ public class IndexController {
   @Autowired
   private PlayerRepository playerRepository;
  
-  @CrossOrigin
   @GetMapping(path={"/", "/games"})
   public ResponseEntity<?> getAllGames(Model model) {
     return ResponseEntity.ok().body(gameRepository.findAll());

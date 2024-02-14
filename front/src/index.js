@@ -119,7 +119,7 @@ function Menu() {
         return (
             <>
                 <div className="Title">
-                    <h1>SPATIAL WAR</h1>
+                    <h1>DofuZZ</h1>
                 </div>
                 {isLoggedIn && <h3>Welcome, {getUserName()}</h3>}
                 <div className="Buttons">
