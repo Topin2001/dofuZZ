@@ -71,11 +71,11 @@ public class Game {
     public void setNb_turns(int nb_turns){
         this.nb_turns = nb_turns;
     }
-    public void addPlayer(Player player){
+    public void addPlayer(Long playerId){
         if (this.player1_id == null){
-            this.player1_id = player.getId();
+            this.player1_id = playerId;
         } else if (this.player2_id == null){
-            this.player2_id = player.getId();
+            this.player2_id = playerId;
         }
     }
 

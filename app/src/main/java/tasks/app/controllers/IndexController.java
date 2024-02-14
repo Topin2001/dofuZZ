@@ -5,6 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -17,22 +18,22 @@ import app.entities.Player;
 import app.repositories.PlayerRepository;
 import app.repositories.GameRepository;
 
-@Controller    
+@Controller
 public class IndexController {
-  
-  @Autowired 
+
+  @Autowired
   private GameRepository gameRepository;
 
   @Autowired
   private PlayerRepository playerRepository;
- 
+
   @CrossOrigin
-  @GetMapping(path={"/", "/games"})
+  @GetMapping(path = { "/", "/games" })
   public ResponseEntity<?> getAllGames(Model model) {
     return ResponseEntity.ok().body(gameRepository.findAll());
   }
 
-  @PostMapping(path="/games")
+  @PostMapping(path = "/games")
   public ResponseEntity<?> addNewGame(@RequestParam String code) {
     Game game = new Game(code);
     gameRepository.save(game);
@@ -40,23 +41,7 @@ public class IndexController {
     return ResponseEntity.status(HttpStatus.CREATED).build();
   }
 
-  @PostMapping(path="/games/{gameId}/players")
-  public ResponseEntity<?> addNewPlayerToGame(@RequestParam String playerName, @RequestParam Long gameId) {
-    Game game = gameRepository.findById(gameId).orElse(null);
-    if (game == null) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Game not found");
-    }
-
-    Player player = new Player(playerName);
-    playerRepository.save(player);
-
-    game.addPlayer(player);
-    gameRepository.save(game);
-
-    return ResponseEntity.status(HttpStatus.CREATED).build();
-  }
-
-  @PostMapping(path="/players/{playerId}/move")
+  @PostMapping(path = "/players/{playerId}/move")
   public ResponseEntity<?> movePlayer(@RequestParam int posX, @RequestParam int posY, @RequestParam Long playerId) {
     Player player = playerRepository.findById(playerId).orElse(null);
     if (player == null) {
@@ -70,50 +55,82 @@ public class IndexController {
     return ResponseEntity.ok().build();
   }
 
-  @GetMapping(path="/players")
-    public ResponseEntity<?> getAllPlayers(Model model) {
-        return ResponseEntity.ok().body(playerRepository.findAll());
+  @GetMapping(path = "/players")
+  public ResponseEntity<?> getAllPlayers(Model model) {
+    return ResponseEntity.ok().body(playerRepository.findAll());
+  }
+
+  @GetMapping(path = "/games/{gameId}")
+  public ResponseEntity<?> getGame(@RequestParam Long gameId) {
+    return ResponseEntity.ok().body(gameRepository.findById(gameId).orElse(null));
+  }
+
+  @GetMapping(path = "/players/{playerId}")
+  public ResponseEntity<?> getPlayer(@RequestParam Long playerId) {
+    return ResponseEntity.ok().body(playerRepository.findById(playerId).orElse(null));
+  }
+
+  @GetMapping(path = "/games/{gameId}/players")
+  public ResponseEntity<?> getPlayersInGame(@RequestParam Long gameId) {
+    Game game = gameRepository.findById(gameId).orElse(null);
+    if (game == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Game not found");
+    }
+    return ResponseEntity.ok().body(game.getPlayers());
+  }
+
+  @PostMapping(path = "/games/{gameId}/players/{playerId}")
+  public ResponseEntity<?> addPlayerToGame(@RequestParam Long gameId, @RequestParam Long playerId) {
+    Game game = gameRepository.findById(gameId).orElse(null);
+    if (game == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Game not found");
+    }
+    Player player = playerRepository.findById(playerId).orElse(null);
+    if (player == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Player not found");
+    }
+    game.addPlayer(playerId);
+    gameRepository.save(game);
+    return ResponseEntity.status(HttpStatus.CREATED).build();
+  }
+
+  public static class PlayerRegistrationRequest {
+    private String username;
+    private String password;
+
+    public String getUsername() {
+      return username;
     }
 
-    @PostMapping(path="/players")
-    public ResponseEntity<?> addNewPlayer(@RequestParam String name) {
-        Player player = new Player(name);
-        playerRepository.save(player);
-
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public void setUsername(String username) {
+      this.username = username;
     }
 
-    @GetMapping(path="/games/{gameId}")
-    public ResponseEntity<?> getGame(@RequestParam Long gameId) {
-        return ResponseEntity.ok().body(gameRepository.findById(gameId).orElse(null));
+    public String getPassword() {
+      return password;
     }
 
-    @GetMapping(path="/players/{playerId}")
-    public ResponseEntity<?> getPlayer(@RequestParam Long playerId) {
-        return ResponseEntity.ok().body(playerRepository.findById(playerId).orElse(null));
+    public void setPassword(String password) {
+      this.password = password;
     }
+  }
 
-    @GetMapping(path="/games/{gameId}/players")
-    public ResponseEntity<?> getPlayersInGame(@RequestParam Long gameId) {
-        Game game = gameRepository.findById(gameId).orElse(null);
-        if (game == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Game not found");
-        }
-        return ResponseEntity.ok().body(game.getPlayers());
-    }
+  @PostMapping(path = "/register")
+  public ResponseEntity<?> register(@RequestBody PlayerRegistrationRequest request) {
+    Player player = new Player(request.getUsername(), request.getPassword());
+    playerRepository.save(player);
+    return ResponseEntity.status(HttpStatus.CREATED).body(player.jwtToken());
+  }
 
-    @PostMapping(path="/games/{gameId}/players/{playerId}")
-    public ResponseEntity<?> addPlayerToGame(@RequestParam Long gameId, @RequestParam Long playerId) {
-        Game game = gameRepository.findById(gameId).orElse(null);
-        if (game == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Game not found");
-        }
-        Player player = playerRepository.findById(playerId).orElse(null);
-        if (player == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Player not found");
-        }
-        game.addPlayer(player);
-        gameRepository.save(game);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+  @PostMapping(path = "/login")
+  public ResponseEntity<?> login(@RequestBody PlayerRegistrationRequest request) {
+    Player player = playerRepository.findByName(request.getUsername());
+    if (player == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Player not found");
     }
+    if (!player.getPassword().equals(request.getPassword())) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Wrong password");
+    }
+    return ResponseEntity.ok().body(player.jwtToken());
+  }
 }

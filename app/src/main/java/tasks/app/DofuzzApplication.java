@@ -9,6 +9,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 
 import org.slf4j.Logger;
@@ -22,46 +23,51 @@ import java.util.Map;
 @SpringBootApplication
 public class DofuzzApplication implements CommandLineRunner {
 
-  private static final Logger log = LoggerFactory.getLogger(DofuzzApplication.class);
-  
-  @Autowired
-  JdbcTemplate jdbcTemplate;
+        @Bean
+        public WebMvcConfigurer corsConfigurer() {
+                return new WebMvcConfigurer() {
+                        @Override
+                        public void addCorsMappings(CorsRegistry registry) {
+                                registry.addMapping("/**")
+                                                .allowedOrigins("http://localhost:3000")
+                                                .allowedMethods("GET", "POST", "PUT", "DELETE");
+                        }
+                };
+        }
 
-  public static void main(String[] args) {
-    SpringApplication.run(DofuzzApplication.class, args);
-  }
+        private static final Logger log = LoggerFactory.getLogger(DofuzzApplication.class);
 
-  @Override
-  public void run(String... strings) throws Exception {
+        @Autowired
+        JdbcTemplate jdbcTemplate;
 
-    List<String> list = Arrays.asList(strings);
-    if (list.contains("install")) {
-      jdbcTemplate.execute("DROP TABLE players IF EXISTS");
-      jdbcTemplate.execute("DROP TABLE games IF EXISTS");
-      jdbcTemplate.execute("DROP TABLE spells IF EXISTS");
-      jdbcTemplate.execute("DROP TABLE tokens IF EXISTS");
-      
-      jdbcTemplate.execute("CREATE TABLE players(" +
-              "id SERIAL, player_name VARCHAR(255), posX INTEGER, posY INTEGER, creation_date TIMESTAMP)");
-      jdbcTemplate.execute("CREATE TABLE games(" +
-              "id SERIAL, game_code VARCHAR(255), creation_date TIMESTAMP)");
-      jdbcTemplate.execute("CREATE TABLE spells(" +
-              "id SERIAL, spell_name VARCHAR(255), damage INTEGER, cost INTEGER)");
-      jdbcTemplate.execute("CREATE TABLE tokens(" +
-              "token_id SERIAL, token VARCHAR(255))");
+        public static void main(String[] args) {
+                SpringApplication.run(DofuzzApplication.class, args);
+        }
 
-      jdbcTemplate.update("INSERT INTO spells(spell_name, damage, cost) VALUES(?, ?, ?)", "Fireball", 10, 5);
-      jdbcTemplate.update("INSERT INTO spells(spell_name, damage, cost) VALUES(?, ?, ?)", "Forst", 5, 3);
+        @Override
+        public void run(String... strings) throws Exception {
 
-  }
-  }
+                List<String> list = Arrays.asList(strings);
+                if (list.contains("install")) {
+                        jdbcTemplate.execute("DROP TABLE players IF EXISTS");
+                        jdbcTemplate.execute("DROP TABLE games IF EXISTS");
+                        jdbcTemplate.execute("DROP TABLE spells IF EXISTS");
+                        jdbcTemplate.execute("DROP TABLE tokens IF EXISTS");
 
-  	public WebMvcConfigurer corsConfigurer() {
-		return new WebMvcConfigurer() {
-			@Override
-			public void addCorsMappings(CorsRegistry registry) {
-				registry.addMapping("/").allowedOrigins("http://localhost:9000");
-			}
-		};
-	}
+                        jdbcTemplate.execute("CREATE TABLE players(" +
+                                        "id SERIAL, player_name VARCHAR(255), password VARCHAR(255), posX INTEGER, posY INTEGER, creation_date TIMESTAMP)");
+                        jdbcTemplate.execute("CREATE TABLE games(" +
+                                        "id SERIAL, code VARCHAR(255), creation_date TIMESTAMP, player1_id INTEGER, player2_id INTEGER, nb_turns INTEGER)");
+                        jdbcTemplate.execute("CREATE TABLE spells(" +
+                                        "id SERIAL, spell_name VARCHAR(255), damage INTEGER, cost INTEGER)");
+                        jdbcTemplate.execute("CREATE TABLE tokens(" +
+                                        "token_id SERIAL, token VARCHAR(255))");
+
+                        jdbcTemplate.update("INSERT INTO spells(spell_name, damage, cost) VALUES(?, ?, ?)", "Fireball",
+                                        10, 5);
+                        jdbcTemplate.update("INSERT INTO spells(spell_name, damage, cost) VALUES(?, ?, ?)", "Forst", 5,
+                                        3);
+
+                }
+        }
 }
