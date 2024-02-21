@@ -117,9 +117,17 @@ public class IndexController {
 
   @PostMapping(path = "/register")
   public ResponseEntity<?> register(@RequestBody PlayerRegistrationRequest request) {
-    Player player = new Player(request.getUsername(), request.getPassword());
-    playerRepository.save(player);
-    return ResponseEntity.status(HttpStatus.CREATED).body(player.jwtToken());
+    Player playerExists = playerRepository.findByName(request.getUsername());
+    if (playerExists != null) {
+      return ResponseEntity.status(HttpStatus.CONFLICT).body("Player already exists");
+    } else if (request.getUsername().length() < 3 || request.getPassword().length() < 3) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body("Username and password must be at least 3 characters long");
+    } else {
+      Player player = new Player(request.getUsername(), request.getPassword());
+      playerRepository.save(player);
+      return ResponseEntity.status(HttpStatus.CREATED).body(player.jwtToken());
+    }
   }
 
   @PostMapping(path = "/login")

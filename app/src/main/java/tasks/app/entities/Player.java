@@ -18,6 +18,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 
 import java.security.Key;
+import java.util.Base64;
 import java.util.Date;
 
 @Entity
@@ -108,28 +109,15 @@ public class Player {
     }
 
     public String jwtToken() {
-        private static final String SECRET_KEY = "YourSecretKeyHere";
 
+        final String SECRET_KEY = "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF";
+        
         String jwtToken = Jwts.builder()
                 .claim("name", name) // Using username as the subject
                 .claim("playerId", id) // Adding playerId as a claim
                 .setIssuedAt(new Date())
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
                 .compact();
-
-        try {
-            Jws<Claims> claims = Jwts.parserBuilder()
-                    .setSigningKey(SECRET_KEY) // Use the predetermined key
-                    .build()
-                    .parseClaimsJws(jwtToken);
-
-            System.out.println("Token is valid.");
-            System.out.println("Name: " + claims.getBody().get("name"));
-            System.out.println("Player ID: " + claims.getBody().get("playerId"));
-            // Add more checks or processing as needed
-        } catch (Exception e) {
-            System.out.println("Token validation failed: " + e.getMessage());
-        }
 
         return jwtToken;
     }
