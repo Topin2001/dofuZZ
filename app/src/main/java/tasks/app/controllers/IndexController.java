@@ -42,11 +42,27 @@ public class IndexController {
   }
 
   @PostMapping(path = "/players/{playerId}/move")
-  public ResponseEntity<?> movePlayer(@RequestParam int posX, @RequestParam int posY, @RequestParam Long playerId) {
+  public ResponseEntity<?> movePlayer(@RequestParam int posX, @RequestParam int posY, @RequestParam String playerJwt) {
+    if (playerJwt == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No JWT token provided");
+    }
+    if (!Player.checkJWTToken(playerJwt)) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token is not valid");
+    }
+    Long playerId = Player.getIdFromJwt(playerJwt);
     Player player = playerRepository.findById(playerId).orElse(null);
     if (player == null) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Player not found");
     }
+    Game game = gameRepository.findById(player.getGameId()).orElse(null);
+    if (game == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Game not found");
+    }
+    //Check the tour of game
+    if (game.getNb_turns()%2 != (game.getPlayer1_id().equals(playerId) ? 0 : 1)){
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Not your turn");
+    }
+    game.setNb_turns(game.getNb_turns() + 1);
 
     player.setPosX(posX);
     player.setPosY(posY);
@@ -70,15 +86,6 @@ public class IndexController {
     return ResponseEntity.ok().body(playerRepository.findById(playerId).orElse(null));
   }
 
-  @GetMapping(path = "/games/{gameId}/players")
-  public ResponseEntity<?> getPlayersInGame(@RequestParam Long gameId) {
-    Game game = gameRepository.findById(gameId).orElse(null);
-    if (game == null) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Game not found");
-    }
-    return ResponseEntity.ok().body(game.getPlayers());
-  }
-
   @PostMapping(path = "/games/{gameId}/players/{playerId}")
   public ResponseEntity<?> addPlayerToGame(@RequestParam Long gameId, @RequestParam Long playerId) {
     Game game = gameRepository.findById(gameId).orElse(null);
@@ -91,6 +98,8 @@ public class IndexController {
     }
     game.addPlayer(playerId);
     gameRepository.save(game);
+    player.setGameId(gameId);
+    playerRepository.save(player);
     return ResponseEntity.status(HttpStatus.CREATED).build();
   }
 

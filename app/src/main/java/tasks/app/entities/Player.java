@@ -35,10 +35,14 @@ public class Player {
     @Column(name = "password")
     private String password;
 
+    @Column(name = "gameid")
+    private Long gameid;
     @Column(name = "posX")
     private int posX;
     @Column(name = "posY")
     private int posY;
+
+
     @Column(name = "creation_date")
     @CreationTimestamp
     private Date creationDate;
@@ -49,6 +53,7 @@ public class Player {
     public Player(String name, String password) {
         this.name = name;
         this.password = password;
+        this.gameid = (long) 0;
         this.posX = 0;
         this.posY = 0;
     }
@@ -58,7 +63,6 @@ public class Player {
         return String.format("Player[id=%d, name='%s', posX=%d, posY=%d, creationDate=%s]", id, name, posX, posY,
                 creationDate);
     }
-    // il faut mettre les getters et les setters
 
     public Long getId() {
         return id;
@@ -74,6 +78,14 @@ public class Player {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Long getGameId() {
+        return gameid;
+    }
+
+    public void setGameId(Long gameid) {
+        this.gameid = gameid;
     }
 
     public int getPosX() {
@@ -120,6 +132,34 @@ public class Player {
                 .compact();
 
         return jwtToken;
+    }
+
+    public static Boolean checkJWTToken (String jwtToken) {
+        final String SECRET_KEY = "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF";
+
+        try {
+            Jws<Claims> claims = Jwts.parserBuilder()
+                    .setSigningKey(SECRET_KEY)
+                    .build()
+                    .parseClaimsJws(jwtToken);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static Long getIdFromJwt (String jwtToken){
+        final String SECRET_KEY = "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF";
+
+        try {
+            Jws<Claims> claims = Jwts.parserBuilder()
+                    .setSigningKey(SECRET_KEY)
+                    .build()
+                    .parseClaimsJws(jwtToken);
+            return Long.parseLong(claims.getBody().get("playerId").toString());
+        } catch (Exception e) {
+            throw new RuntimeException("Could not parse JWT token", e);
+        }
     }
 
 }

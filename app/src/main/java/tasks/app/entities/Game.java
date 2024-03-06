@@ -78,16 +78,4 @@ public class Game {
             this.player2_id = playerId;
         }
     }
-
-    // getPlayers
-    public List<Long> getPlayers(){
-        List<Long> players = new ArrayList<Long>();
-        if (this.player1_id != null){
-            players.add(this.player1_id);
-        }
-        if (this.player2_id != null){
-            players.add(this.player2_id);
-        }
-        return players;
-    }
 }   
