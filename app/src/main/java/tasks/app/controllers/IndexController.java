@@ -19,6 +19,7 @@ import app.entities.Player;
 import app.entities.Spell;
 import app.repositories.PlayerRepository;
 import app.repositories.GameRepository;
+import app.repositories.SpellRepository;
 
 @Controller
 public class IndexController {
@@ -95,37 +96,41 @@ public class IndexController {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Game not found");
     }
 
-    // Check the tour of game
+    // Check the turn of the game
     if (game.getNb_turns() % 2 != (game.getPlayer1_id().equals(playerId) ? 0 : 1)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Not your turn");
     }
 
-    //Check the spellId
-    if (spellId == null) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No spellId provided");
+    // Check if spellName is provided
+    if (spellId == 0) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No spell provided");
     }
 
-    Spell spell = spellRepository.findById(spellId).orElse(null);
+    // Find the spell
+    Spell spell = SpellRepository.findById(spellId).orElse(null);
+    
+    if (spell == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Spell not found");
+    }
 
-
-    //Recherche de l'autre joueur de la partie
+    // Find the other player in the game
     Player targetPlayer = game.getPlayer1_id().equals(playerId) ? playerRepository.findById(game.getPlayer2_id()).orElse(null) : playerRepository.findById(game.getPlayer1_id()).orElse(null);
 
     if (targetPlayer == null) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No player at the target position");
     }
 
-    //Check if player in range of spell
+    // Check if player is in range of spell
     if (Math.abs(player.getPosX() - targetPosX) > spell.getRange() || Math.abs(player.getPosY() - targetPosY) > spell.getRange()) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Too far Looser");
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Target player is out of range");
     }
 
-    targetPlayer.setLife(targetPlayer.getLife() - spell.getDamage();
+    targetPlayer.setLife(targetPlayer.getLife() - spell.getDamage());
 
-    // Mettre à jour le nombre de tours
+    // Update the number of turns
     game.setNb_turns(game.getNb_turns() + 1);
 
-    // Enregistrer les modifications
+    // Save the changes
     playerRepository.save(player);
 
     return ResponseEntity.ok().build();
