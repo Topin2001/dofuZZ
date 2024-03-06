@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -58,14 +59,59 @@ public class IndexController {
     if (game == null) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Game not found");
     }
-    //Check the tour of game
-    if (game.getNb_turns()%2 != (game.getPlayer1_id().equals(playerId) ? 0 : 1)){
+    // Check the tour of game
+    if (game.getNb_turns() % 2 != (game.getPlayer1_id().equals(playerId) ? 0 : 1)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Not your turn");
     }
     game.setNb_turns(game.getNb_turns() + 1);
 
     player.setPosX(posX);
     player.setPosY(posY);
+    playerRepository.save(player);
+
+    return ResponseEntity.ok().build();
+  }
+
+  @PostMapping(path = "/players/{playerId}/attack")
+  public ResponseEntity<?> attackPlayer(@RequestParam int targetPosX,
+      @RequestParam int targetPosY, @RequestParam String playerJwt) {
+    if (playerJwt == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No JWT token provided");
+    }
+    if (!Player.checkJWTToken(playerJwt)) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token is not valid");
+    }
+
+    Long playerId = Player.getIdFromJwt(playerJwt);
+
+    Player player = playerRepository.findById(playerId).orElse(null);
+    if (player == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Player not found");
+    }
+
+    Game game = gameRepository.findById(player.getGameId()).orElse(null);
+    if (game == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Game not found");
+    }
+
+    // Check the tour of game
+    if (game.getNb_turns() % 2 != (game.getPlayer1_id().equals(playerId) ? 0 : 1)) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Not your turn");
+    }
+
+    //Recherche de l'autre joueur de la partie
+    Player targetPlayer = game.getPlayer1_id().equals(playerId) ? playerRepository.findById(game.getPlayer2_id()).orElse(null) : playerRepository.findById(game.getPlayer1_id()).orElse(null);
+
+    if (targetPlayer == null) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No player at the target position");
+    }
+
+    targetPlayer.setLife(targetPlayer.getLife() - 20);
+
+    // Mettre à jour le nombre de tours
+    game.setNb_turns(game.getNb_turns() + 1);
+
+    // Enregistrer les modifications
     playerRepository.save(player);
 
     return ResponseEntity.ok().build();

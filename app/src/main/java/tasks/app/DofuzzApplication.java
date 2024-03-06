@@ -55,7 +55,7 @@ public class DofuzzApplication implements CommandLineRunner {
                         jdbcTemplate.execute("DROP TABLE tokens IF EXISTS");
 
                         jdbcTemplate.execute("CREATE TABLE players(" +
-                                        "id SERIAL, player_name VARCHAR(255), password VARCHAR(255), gameid SERIAL, posX INTEGER, posY INTEGER, creation_date TIMESTAMP)");
+                                        "id SERIAL, player_name VARCHAR(255), password VARCHAR(255), gameid SERIAL, posX INTEGER, posY INTEGER, life INTEGER, creation_date TIMESTAMP)");
                         jdbcTemplate.execute("CREATE TABLE games(" +
                                         "id SERIAL, code VARCHAR(255), creation_date TIMESTAMP, player1_id INTEGER, player2_id INTEGER, nb_turns INTEGER)");
                         jdbcTemplate.execute("CREATE TABLE spells(" +

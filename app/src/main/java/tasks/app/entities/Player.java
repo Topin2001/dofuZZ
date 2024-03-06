@@ -41,6 +41,8 @@ public class Player {
     private int posX;
     @Column(name = "posY")
     private int posY;
+    @Column(name = "life")
+    private int life;
 
 
     @Column(name = "creation_date")
@@ -56,6 +58,7 @@ public class Player {
         this.gameid = (long) 0;
         this.posX = 0;
         this.posY = 0;
+        this.life = 100;
     }
 
     @Override
@@ -118,6 +121,14 @@ public class Player {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public int getLife() {
+        return life;
+    }
+
+    public void setLife(int life) {
+        this.life = life;
     }
 
     public String jwtToken() {
