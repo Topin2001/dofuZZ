@@ -18,7 +18,8 @@ import app.entities.Player;
 import app.repositories.PlayerRepository;
 import app.repositories.GameRepository;
 
-@Controller
+@CrossOrigin
+@Controller    
 public class IndexController {
 
   @Autowired
