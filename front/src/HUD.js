@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { hoverModes } from "./Player.js";
 import { useEffect } from "react";
 
 import ListGroup from 'react-bootstrap/ListGroup';
@@ -34,7 +33,7 @@ function HUD(props) {
     function ShipsMenu(props) {
         return (
             <ListGroup as="ul" style={{zIndex: 1000, position: "absolute", top: "50%", left: "0%", transform: "translate(0%, -50%)", color:"white"}}>
-                {Object.keys(hoverModes).map((mode, index) => {
+                {/* {Object.keys({}).map((mode, index) => {
                     if (index > 0 && props.ships[index - 1]){
                         const ship = props.ships[index - 1];
                         let bgColor = props.hoverMode === index ? "lightblue" : "transparent";
@@ -42,7 +41,7 @@ function HUD(props) {
                         const color = ship.isSetup ? "red" : "lightgreen";
                         return (
                             <ListGroup.Item as="li" key={index} style={{backgroundColor: bgColor, color: color}}>{mode}</ListGroup.Item>
-                        );}})}
+                        );}})} */}
             </ListGroup>
         );
     }

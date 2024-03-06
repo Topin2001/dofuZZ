@@ -1,20 +1,18 @@
 import Player from './Player.js';
-import Ship from './Ship.js';
 import Renderer from './Renderer.js';
 import Board, { BOARD_SIZE } from './Board.js';
 import Camera from './Camera.js';
 import HUD from './HUD.js';
+import Character from './Character.js';
 
 import * as THREE from 'three';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+
 
 import { Component, useEffect } from 'react';
 
-import { hoverModes } from './Player.js';
-import { hoverAreas } from './Player.js';
-import { TILE_SIZE } from './Board.js';
-import { modelsSettings } from './constants.js';
 
 const style = {
     position: 'absolute', top: 0, left: 0, width: '100%', height: '100%'
@@ -83,69 +81,26 @@ class Game extends Component {
     };
 
     loadModels = () => {
-        this.scene.background = new THREE.CubeTextureLoader().setPath("https://api.belkhiri.dev/models/").load([
-            "right.png", "left.png",
-            "top.png", "bottom.png",
-            "front.png", "back.png"
+        this.scene.background = new THREE.CubeTextureLoader().load([
+            "test_right.png", "test_left.png",
+            "test_top.png", "test_bottom.png",
+            "test_front.png", "test_back.png"
         ]);
 
+        
         const loader = new OBJLoader();
-        Object.keys(hoverModes).forEach((mode, index) => {
-            if (index > 0) {
-                const ship = new Ship({
-                    name: mode,
-                    dimensions: hoverAreas[index],
-                    modelSrc: 'https://api.belkhiri.dev/models/' + mode + '.obj',
-                    textureSrc: 'https://api.belkhiri.dev/models/' + mode + '.png',
-                    board: this.board,
-                    index: index
-                });
-                ship.loadModel(loader, modelsSettings[mode], this.player.hoverRotation, this.models);
-                this.player.ships.push(ship);
-            }
+        const gltfLoader = new GLTFLoader();
+
+        gltfLoader.load("devweb.glb", (gltf) => {
+            gltf.scene.scale.set(5, 5, 5);
+            gltf.scene.position.set(130, -1, 130);
+            this.scene.add(gltf.scene);
+            this.gltf = gltf.scene;
         });
 
-        loader.load(
-            'https://api.belkhiri.dev/models/station06_ring.obj',
-            (object) => {
-                object.name = "station1";
-                object.scale.set(10, 10, 10);
-                object.position.set(70, -30, 70);
-                this.models.add(object);
-                this.scene.add(this.models);
-                // change material of object
-                object.traverse((child) => {
-                    if (child.isMesh) {
-                        child.material = new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load('https://api.belkhiri.dev/models/station06_ring_specular.png') });
-                    }
-                });
 
-                // clone object
-                const object2 = object.clone();
-                object2.name = "station2";
-                object2.position.set(270, -30, 70);
-                this.models.add(object2);
-                this.scene.add(this.models);
-            }
-        )
-
-        loader.load(
-            'https://api.belkhiri.dev/models/station01.obj',
-            (object) => {
-                object.name = "station3";
-                object.scale.set(10, 10, 10);
-                object.position.set(-100, 0, 270);
-                object.rotation.set(1.5, 0.3, 0.5);
-                this.models.add(object);
-                this.scene.add(this.models);
-                // change material of object
-                object.traverse((child) => {
-                    if (child.isMesh) {
-                        child.material = new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load('https://api.belkhiri.dev/models/station01_specular.png') });
-                    }
-                });
-            }
-        )
+        this.playerCharacter = new Character({ scene: this.scene, position: new THREE.Vector3(0,0,0) ,modelPath: "Knight.glb" });
+        // this.ennemyCharacter = new Character({ scene: this.scene, position: new THREE.Vector3(0,0,0) ,modelPath: "Rogue_Hooded.glb" });
     };
 
 
@@ -174,6 +129,8 @@ class Game extends Component {
         for (let i = 0; i < STEPS_PER_FRAME; i++) {
             this.controls(deltaTime);
             this.player.update(deltaTime);
+            this.playerCharacter.update(deltaTime);
+            this.board.hoverTiles(this.camera, this.playerCharacter, this.player.actionType);
         }
 
         this.renderer.render(this.scene, this.camera.camera);
@@ -297,54 +254,9 @@ class Game extends Component {
 
     keyUpListener = (event) => {
         this.keyStates[event.code] = false;
-        let shipSelection = -1;
-        if (event.code == 'KeyE') {
-            shipSelection = 0;
-        }
-        if (event.code == 'Digit1') {
-            if (!this.player.ships[0].isSetup) {
-                this.player.tpUnsetShips(0);
-                shipSelection = 1;
-            }
-        }
-        if (event.code == 'Digit2') {
-            if (!this.player.ships[1].isSetup) {
-                this.player.tpUnsetShips(1);
-                shipSelection = 2;
-            }
-        }
-        if (event.code == 'Digit3') {
-            if (!this.player.ships[2].isSetup) {
-                this.player.tpUnsetShips(2);
-                shipSelection = 3;
-            }
-        }
-        if (event.code == 'Digit4') {
-            if (!this.player.ships[3].isSetup) {
-                this.player.tpUnsetShips(3);
-                shipSelection = 4;
-            }
-        }
-        if (event.code == 'KeyR') {
-            this.player.hoverRotation += 1;
-            if (this.player.hoverRotation > 1) this.player.hoverRotation = 0;
-        }
-        if (event.code == 'KeyF') {
-            this.player.mode = 1 - this.player.mode;
-        }
-        if (shipSelection != -1) {
-            const ship = this.player.ships.filter(ship => ship.index == shipSelection)[0];
-            if (ship.isSetup) {
-                ship.isSetup = false;
-                ship.model.position.x = -1000;
-                ship.model.position.z = -1000;
-                const tiles = this.board.getTilesOccupiedByShip(ship.index);
-                tiles.forEach((tile) => {
-                    tile.material.color.set(0x00ff00);
-                });
-            }
-            this.player.hoverMode = shipSelection;
-        }
+        // if (event.code == 'KeyE') {
+        //     shipSelection = 0;
+        // }
         this.setState({ hoverMode: this.player.hoverMode });
     };
 
@@ -354,52 +266,13 @@ class Game extends Component {
 
     clickUpListener() {
         if (document.pointerLockElement !== null) {
-            if (this.player.mode == 1) {
-                const ship = this.player.ships[this.player.hoverMode - 1];
-                console.log(ship);
-                let shipOriginIndexs = this.board.getPointedTile(this.camera);
-                if (shipOriginIndexs.x != -1 && shipOriginIndexs.z != -1) {
-                    // lock ship to grid
-                    ship.position.x = shipOriginIndexs.x;
-                    ship.position.z = shipOriginIndexs.z;
-                    ship.rotation = this.player.hoverRotation;
-                    ship.isSetup = true;
-                    const x = shipOriginIndexs.x;
-                    const y = shipOriginIndexs.z;
-                    const horizontalOrientation = this.player.hoverRotation ? "false" : "true";
-                    const shipType = ship.index - 1;
-                    // send request to server
-                    fetch(this.state.API_URL + this.props.gameId + '/ship/' + this.props.playerId + '?x=' + x + '&y=' + y + '&horizontalOrientation=' + horizontalOrientation + '&shipType=' + shipType, {
-                        method: 'POST'
-                    })
-                    .then(async response => {
-                        if (response.ok){
-                            const occupiedTiles = this.board.getShipTiles(shipOriginIndexs, ship.dimensions, this.player.hoverRotation);
-                            occupiedTiles.forEach((tileCoord) => {
-                                    const tile = this.board.getTileByIndex(tileCoord);
-                                    this.board.occupiedTiles.push(tile);
-                                    tile.isTaken = true;
-                                    tile.occupiedBy = ship.index;
-                                    this.player.hoverMode = 0;
-                                    ship.model.children[0].material.opacity = 1;
-                                });
-                                ship.isSetup = true;
-                                this.setState({ errorMessage: "No error" });
-                        }
-                        else {
-                            const message = await response.text();
-                            ship.isSetup = false;
-                            throw new Error(message);
-                        }
-                    })
-                        .catch((error) => {
-                            // set error
-                            this.setState({ errorMessage: error.message });
-                            console.error('Error:', this.state.errorMessage);
-                        });
-                        
-                }
-
+            if (this.player.actionType == 1) {
+                this.playerCharacter.moveToTile(this.board.getPointedTile(this.camera).x, this.board.getPointedTile(this.camera).z);
+            }
+            else if (this.player.actionType == 0) {
+                const targetedTile = this.board.getPointedTile(this.camera);
+                // request to check if the tile is in range etc...
+                this.playerCharacter.attackTile(targetedTile, 0);
             }
         };
     };
