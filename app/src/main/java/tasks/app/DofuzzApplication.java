@@ -59,14 +59,14 @@ public class DofuzzApplication implements CommandLineRunner {
                         jdbcTemplate.execute("CREATE TABLE games(" +
                                         "id SERIAL, code VARCHAR(255), creation_date TIMESTAMP, player1_id INTEGER, player2_id INTEGER, nb_turns INTEGER)");
                         jdbcTemplate.execute("CREATE TABLE spells(" +
-                                        "id SERIAL, spell_name VARCHAR(255), damage INTEGER, cost INTEGER)");
+                                        "id SERIAL, spell_name VARCHAR(255), damage INTEGER, range INTEGER)");
                         jdbcTemplate.execute("CREATE TABLE tokens(" +
                                         "token_id SERIAL, token VARCHAR(255))");
 
                         jdbcTemplate.update("INSERT INTO spells(spell_name, damage, cost) VALUES(?, ?, ?)", "Fireball",
-                                        10, 5);
+                                        10, 2);
                         jdbcTemplate.update("INSERT INTO spells(spell_name, damage, cost) VALUES(?, ?, ?)", "Forst", 5,
-                                        3);
+                                        1);
 
                 }
         }

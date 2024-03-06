@@ -17,8 +17,8 @@ public class Spell {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "spell_id")
     private Long id;
-    @Column(name = "cost")
-    private int cost;
+    @Column(name = "range")
+    private int range;
     @Column(name = "damage")
     private int damage;
     @Column(name = "name")
@@ -27,16 +27,16 @@ public class Spell {
 
     protected Spell() {}
 
-    public Spell(String name, int cost, int damage) {
+    public Spell(String name, int range, int damage) {
         this.name = name;
-        this.cost = cost;
+        this.range = range;
         this.damage = damage;
     }
 
     @Override
     public String toString() {
         return String.format(
-                "Spell[id=%d, name='%s', cost='%d', damage='%d']", id, name, cost, damage);
+                "Spell[id=%d, name='%s', range='%d', damage='%d']", id, name, range, damage);
     }
 
     public Long getId() {
@@ -45,11 +45,11 @@ public class Spell {
     public void setId(Long id) {
         this.id = id;
     }
-    public int getCost(){
-        return cost;
+    public int getRange(){
+        return range;
     }
-    public void setCost(int cost){
-        this.cost = cost;
+    public void setRange(int range){
+        this.range = range;
     }
     public int getDamage(){
         return damage;

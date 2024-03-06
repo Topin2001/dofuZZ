@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 
 import app.entities.Game;
 import app.entities.Player;
+import app.entities.Spell;
 import app.repositories.PlayerRepository;
 import app.repositories.GameRepository;
 
@@ -74,7 +75,7 @@ public class IndexController {
 
   @PostMapping(path = "/players/{playerId}/attack")
   public ResponseEntity<?> attackPlayer(@RequestParam int targetPosX,
-      @RequestParam int targetPosY, @RequestParam String playerJwt) {
+      @RequestParam int targetPosY, @RequestParam String playerJwt, @RequestParam Long spellId) {
     if (playerJwt == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No JWT token provided");
     }
@@ -99,6 +100,14 @@ public class IndexController {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Not your turn");
     }
 
+    //Check the spellId
+    if (spellId == null) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No spellId provided");
+    }
+
+    Spell spell = spellRepository.findById(spellId).orElse(null);
+
+
     //Recherche de l'autre joueur de la partie
     Player targetPlayer = game.getPlayer1_id().equals(playerId) ? playerRepository.findById(game.getPlayer2_id()).orElse(null) : playerRepository.findById(game.getPlayer1_id()).orElse(null);
 
@@ -106,7 +115,12 @@ public class IndexController {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No player at the target position");
     }
 
-    targetPlayer.setLife(targetPlayer.getLife() - 20);
+    //Check if player in range of spell
+    if (Math.abs(player.getPosX() - targetPosX) > spell.getRange() || Math.abs(player.getPosY() - targetPosY) > spell.getRange()) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Too far Looser");
+    }
+
+    targetPlayer.setLife(targetPlayer.getLife() - spell.getDamage();
 
     // Mettre à jour le nombre de tours
     game.setNb_turns(game.getNb_turns() + 1);
