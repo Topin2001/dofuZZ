@@ -25,6 +25,7 @@ function Menu() {
             setIsLoggedIn(false);
         }
         else {
+            setPlayerId(getPlayerId());
             setIsLoggedIn(true);
         }
     }, [page]);
@@ -34,15 +35,10 @@ function Menu() {
         setPage('menu');
     }
 
-    function playerIdCallBack(playerId) {
-        setPlayerId(playerId);
-        console.log("playerId: " + playerId);
-        setPage('game');
-    }
-
     function gameIdCallBack(gameId) {
         console.log("gameId: " + gameId);
         setGameId(gameId);
+        setPage('game');
     }
 
     function setJWT(jwtToken) {
@@ -59,6 +55,18 @@ function Menu() {
         const decodedPayload = atob(payload);
         const username = JSON.parse(decodedPayload).username;
         return username;
+    }
+
+    function getPlayerId() {
+        const jwt = document.cookie.split(';').find(cookie => cookie.trim().startsWith('jwt='));
+        if (!jwt) {
+            return null;
+        }
+        const jwtToken = jwt.split('=')[1];
+        const payload = jwtToken.split('.')[1];
+        const decodedPayload = atob(payload);
+        const playerId = JSON.parse(decodedPayload).playerId;
+        return playerId;
     }
     
     function register(event) {
@@ -155,10 +163,10 @@ function Menu() {
                 </div>
             </>);
     } else if (page === 'join') {
-        return <JoinGame returnButtonCallBack={returnButtonCallBack} playerIdCallBack={playerIdCallBack} gameIdCallBack={gameIdCallBack} backendUrl={backendUrl} />;
+        return <JoinGame returnButtonCallBack={returnButtonCallBack} gameIdCallBack={gameIdCallBack} backendUrl={backendUrl} playerId={playerId} />;
     }
     else if (page === 'create') {
-        return <CreateGame returnButtonCallBack={returnButtonCallBack} playerIdCallBack={playerIdCallBack} gameIdCallBack={gameIdCallBack} backendUrl={backendUrl} />;
+        return <CreateGame returnButtonCallBack={returnButtonCallBack} gameIdCallBack={gameIdCallBack} backendUrl={backendUrl} playerId={playerId} />;
     }
     else if (page === 'game') {
         return <App playerId={playerId} gameId={gameId} backendUrl={backendUrl} />;

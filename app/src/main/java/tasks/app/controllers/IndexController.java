@@ -35,11 +35,11 @@ public class IndexController {
   }
 
   @PostMapping(path = "/games")
-  public ResponseEntity<?> addNewGame(@RequestParam String code) {
+  public ResponseEntity<Long> addNewGame(@RequestParam String code) {
     Game game = new Game(code);
     gameRepository.save(game);
 
-    return ResponseEntity.status(HttpStatus.CREATED).build();
+    return ResponseEntity.status(HttpStatus.CREATED).body(game.getId());
   }
 
   @PostMapping(path = "/players/move")
@@ -99,6 +99,27 @@ public class IndexController {
   public ResponseEntity<?> getPlayer(@RequestParam Long playerId) {
     return ResponseEntity.ok().body(playerRepository.findById(playerId).orElse(null));
   }
+
+    // Add a player to a game using its code, the player using this route is the player 2
+    @PostMapping(path = "/games/join")
+    public ResponseEntity<?> joinGame(@RequestParam String code, @RequestParam Long playerId) {
+        Game game = gameRepository.findByCode(code);
+        if (game == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Game not found");
+        }
+        if (game.getPlayer2_id() != null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Game is full");
+        }
+        Player player = playerRepository.findById(playerId).orElse(null);
+        if (player == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Player not found");
+        }
+        game.setPlayer2_id(playerId);
+        gameRepository.save(game);
+        player.setGameId(game.getId());
+        playerRepository.save(player);
+        return ResponseEntity.status(HttpStatus.CREATED).body(game.getId());
+    }
 
   @PostMapping(path = "/games/{gameId}/players/{playerId}")
   public ResponseEntity<?> addPlayerToGame(@RequestParam Long gameId, @RequestParam Long playerId) {
