@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,8 +16,10 @@ import org.springframework.http.HttpStatus;
 
 import app.entities.Game;
 import app.entities.Player;
+import app.entities.Spell;
 import app.repositories.PlayerRepository;
 import app.repositories.GameRepository;
+import app.repositories.SpellRepository;
 
 @CrossOrigin
 @Controller    
@@ -27,6 +30,9 @@ public class IndexController {
 
   @Autowired
   private PlayerRepository playerRepository;
+
+  @Autowired 
+  private SpellRepository SpellRepository;
 
   @CrossOrigin
   @GetMapping(path = { "/", "/games" })
@@ -59,9 +65,9 @@ public class IndexController {
     if (game == null) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Game not found");
     }
-    // Check the tour of the game
+    // Check the tour of game
     if (game.getNb_turns() % 2 != (game.getPlayer1_id().equals(playerId) ? 0 : 1)) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Not your turn");
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Not your turn");
     }
     game.setNb_turns(game.getNb_turns() + 1);
 
@@ -84,6 +90,68 @@ public class IndexController {
 
     return ResponseEntity.ok().build();
 }
+
+  @PostMapping(path = "/players/{playerId}/attack")
+  public ResponseEntity<?> attackPlayer(@RequestParam int targetPosX,
+      @RequestParam int targetPosY, @RequestParam String playerJwt, @RequestParam Long spellId) {
+    if (playerJwt == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No JWT token provided");
+    }
+    if (!Player.checkJWTToken(playerJwt)) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token is not valid");
+    }
+
+    Long playerId = Player.getIdFromJwt(playerJwt);
+
+    Player player = playerRepository.findById(playerId).orElse(null);
+    if (player == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Player not found");
+    }
+
+    Game game = gameRepository.findById(player.getGameId()).orElse(null);
+    if (game == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Game not found");
+    }
+
+    // Check the turn of the game
+    if (game.getNb_turns() % 2 != (game.getPlayer1_id().equals(playerId) ? 0 : 1)) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Not your turn");
+    }
+
+    if (spellId == null) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No spell id provided");
+    }
+
+    // Find the spell
+    Spell spell = SpellRepository.findById(spellId).orElse(null);
+    
+    if (spell == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Spell not found");
+    }
+
+    // Find the other player in the game
+    Player targetPlayer = game.getPlayer1_id().equals(playerId) ? playerRepository.findById(game.getPlayer2_id()).orElse(null) : playerRepository.findById(game.getPlayer1_id()).orElse(null);
+
+    if (targetPlayer == null) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No player at the target position");
+    }
+
+    // Check if player is in range of spell
+    if (Math.abs(player.getPosX() - targetPosX) > spell.getRange() || Math.abs(player.getPosY() - targetPosY) > spell.getRange()) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Target player is out of range");
+    }
+
+    targetPlayer.setLife(targetPlayer.getLife() - spell.getDamage());
+
+    // Update the number of turns
+    game.setNb_turns(game.getNb_turns() + 1);
+
+    // Save the changes
+    playerRepository.save(player);
+    playerRepository.save(targetPlayer);
+
+    return ResponseEntity.ok().build();
+  }
 
   @GetMapping(path = "/players")
   public ResponseEntity<?> getAllPlayers(Model model) {
