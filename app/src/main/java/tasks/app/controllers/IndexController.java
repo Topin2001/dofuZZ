@@ -21,7 +21,8 @@ import app.repositories.PlayerRepository;
 import app.repositories.GameRepository;
 import app.repositories.SpellRepository;
 
-@Controller
+@CrossOrigin
+@Controller    
 public class IndexController {
 
   @Autowired
@@ -40,29 +41,29 @@ public class IndexController {
   }
 
   @PostMapping(path = "/games")
-  public ResponseEntity<?> addNewGame(@RequestParam String code) {
+  public ResponseEntity<Long> addNewGame(@RequestParam String code) {
     Game game = new Game(code);
     gameRepository.save(game);
 
-    return ResponseEntity.status(HttpStatus.CREATED).build();
+    return ResponseEntity.status(HttpStatus.CREATED).body(game.getId());
   }
 
-  @PostMapping(path = "/players/{playerId}/move")
+  @PostMapping(path = "/players/move")
   public ResponseEntity<?> movePlayer(@RequestParam int posX, @RequestParam int posY, @RequestParam String playerJwt) {
     if (playerJwt == null) {
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No JWT token provided");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No JWT token provided");
     }
     if (!Player.checkJWTToken(playerJwt)) {
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token is not valid");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token is not valid");
     }
     Long playerId = Player.getIdFromJwt(playerJwt);
     Player player = playerRepository.findById(playerId).orElse(null);
     if (player == null) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Player not found");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Player not found");
     }
     Game game = gameRepository.findById(player.getGameId()).orElse(null);
     if (game == null) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Game not found");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Game not found");
     }
     // Check the tour of game
     if (game.getNb_turns() % 2 != (game.getPlayer1_id().equals(playerId) ? 0 : 1)) {
@@ -70,12 +71,25 @@ public class IndexController {
     }
     game.setNb_turns(game.getNb_turns() + 1);
 
+    // Calculate the total distance moved
+    int totalDistance = Math.abs(player.getPosX() - posX) + Math.abs(player.getPosY() - posY);
+    
+    // Check if the total distance moved is more than 5 tiles
+    if (totalDistance > 5) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Can't move more than 5 tiles");
+    }
+
+    // Check if the move is in the board
+    if (posX < 0 || posX >= 10 || posY < 0 || posY >= 10) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid move");
+    }
+
     player.setPosX(posX);
     player.setPosY(posY);
     playerRepository.save(player);
 
     return ResponseEntity.ok().build();
-  }
+}
 
   @PostMapping(path = "/players/{playerId}/attack")
   public ResponseEntity<?> attackPlayer(@RequestParam int targetPosX,
@@ -153,6 +167,27 @@ public class IndexController {
   public ResponseEntity<?> getPlayer(@RequestParam Long playerId) {
     return ResponseEntity.ok().body(playerRepository.findById(playerId).orElse(null));
   }
+
+    // Add a player to a game using its code, the player using this route is the player 2
+    @PostMapping(path = "/games/join")
+    public ResponseEntity<?> joinGame(@RequestParam String code, @RequestParam Long playerId) {
+        Game game = gameRepository.findByCode(code);
+        if (game == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Game not found");
+        }
+        if (game.getPlayer2_id() != null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Game is full");
+        }
+        Player player = playerRepository.findById(playerId).orElse(null);
+        if (player == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Player not found");
+        }
+        game.setPlayer2_id(playerId);
+        gameRepository.save(game);
+        player.setGameId(game.getId());
+        playerRepository.save(player);
+        return ResponseEntity.status(HttpStatus.CREATED).body(game.getId());
+    }
 
   @PostMapping(path = "/games/{gameId}/players/{playerId}")
   public ResponseEntity<?> addPlayerToGame(@RequestParam Long gameId, @RequestParam Long playerId) {
