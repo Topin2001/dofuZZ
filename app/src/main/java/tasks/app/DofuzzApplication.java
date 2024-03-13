@@ -60,7 +60,7 @@ public class DofuzzApplication implements CommandLineRunner {
                         jdbcTemplate.execute("CREATE TABLE players(" +
                                         "id SERIAL, player_name VARCHAR(255), password VARCHAR(255), gameid SERIAL, posX INTEGER, posY INTEGER, life INTEGER, creation_date TIMESTAMP)");
                         jdbcTemplate.execute("CREATE TABLE games(" +
-                                        "id SERIAL, code VARCHAR(255), creation_date TIMESTAMP, player1_id INTEGER, player2_id INTEGER, nb_turns INTEGER)");
+                                        "id SERIAL, code VARCHAR(255), creation_date TIMESTAMP, player1_id INTEGER, player2_id INTEGER, nb_turns INTEGER, winner INTEGER)");
                         jdbcTemplate.execute("CREATE TABLE spells(" +
                                         "id SERIAL, spell_name VARCHAR(255), damage INTEGER, range INTEGER)");
                         jdbcTemplate.execute("CREATE TABLE tokens(" +

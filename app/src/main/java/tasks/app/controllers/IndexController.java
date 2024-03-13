@@ -142,6 +142,9 @@ public class IndexController {
     }
 
     targetPlayer.setLife(targetPlayer.getLife() - spell.getDamage());
+    if (targetPlayer.getLife() <= 0) {
+      game.setWinner(playerId);
+    }
 
     // Update the number of turns
     game.setNb_turns(game.getNb_turns() + 1);
@@ -149,6 +152,7 @@ public class IndexController {
     // Save the changes
     playerRepository.save(player);
     playerRepository.save(targetPlayer);
+    gameRepository.save(game);
 
     return ResponseEntity.ok().build();
   }

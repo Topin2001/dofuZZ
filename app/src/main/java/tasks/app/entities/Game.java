@@ -26,12 +26,15 @@ public class Game {
     private Long player2_id;
     @Column(name="nb_turns")
     private int nb_turns;
+    @Column(name="winner")
+    private int winner;
 
 
     protected Game() {}
 
     public Game(String code) {
         this.code = code;
+        this.winner = -1;
     }
 
     @Override
@@ -70,6 +73,12 @@ public class Game {
     }
     public void setNb_turns(int nb_turns){
         this.nb_turns = nb_turns;
+    }
+    public int getWinner(){
+        return winner;
+    }
+    public void setWinner(int winner){
+        this.winner = winner;
     }
     public void addPlayer(Long playerId){
         if (this.player1_id == null){
