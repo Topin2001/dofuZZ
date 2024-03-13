@@ -30,7 +30,7 @@ class Game extends Component {
         gameState: 'Waiting for players',
         turn: 'Players take turns once all ships are placed',
         endGame: false,
-        API_URL: this.props.backendUrl + "/api/game/",
+        API_URL: this.props.backendUrl,
         winner: null
     };
 
