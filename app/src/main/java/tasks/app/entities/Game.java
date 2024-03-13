@@ -27,14 +27,14 @@ public class Game {
     @Column(name="nb_turns")
     private int nb_turns;
     @Column(name="winner")
-    private int winner;
+    private Long winner;
 
 
     protected Game() {}
 
     public Game(String code) {
         this.code = code;
-        this.winner = -1;
+        this.winner = -1L;
     }
 
     @Override
@@ -74,10 +74,10 @@ public class Game {
     public void setNb_turns(int nb_turns){
         this.nb_turns = nb_turns;
     }
-    public int getWinner(){
+    public Long getWinner(){
         return winner;
     }
-    public void setWinner(int winner){
+    public void setWinner(Long winner){
         this.winner = winner;
     }
     public void addPlayer(Long playerId){
