@@ -7,4 +7,5 @@ import app.entities.Game;
 
 public interface GameRepository 
        extends CrudRepository<Game, Long> {
+        Game findByCode(String code);
 }

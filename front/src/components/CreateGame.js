@@ -6,13 +6,9 @@ function CreateGame(props) {
     function handleCreateGame(event) {
         event.preventDefault();
         const code = document.getElementById('code').value;
-        const url = props.backendUrl + '/api/game/';
+        const url = props.backendUrl + '/games?code=' + code;
         fetch(url, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ code })
         })
             .then(response => {
                 if (response.ok) {
@@ -20,7 +16,28 @@ function CreateGame(props) {
                 }
                 throw new Error('Network response was not ok.');
             })
-            .then(response => response.text())
+            .then(response => 
+                // is response 201?
+                response.text()
+            )
+            .then(data => {
+                // send request ro /games/:id/players/:playerId (playerId from jwt)*
+                const url = props.backendUrl + '/games/' + data + '/players/' + props.playerId + '?gameId=' + data + '&playerId=' + props.playerId;
+                fetch(url, {
+                    method: 'POST',
+                })
+                .then(response => {
+                    if (response.ok) {
+                            return response;
+                        }
+                        throw new Error('Network response was not ok.');
+                    })
+                    .then(e => {
+                        props.gameIdCallBack(data);
+                        console.log("gameId: " + data);
+                    })
+                    .catch(error => alert(error));
+            })
             .catch(error => alert(error));
     }
 

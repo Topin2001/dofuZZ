@@ -19,19 +19,14 @@ function JoinGame(props) {
         event.preventDefault();
         console.log("Joining game");
 
-        const url = props.backendUrl + '/api/game/' + gameid + '?playerId=2';
+        const url = props.backendUrl + '/games/join?code=' + gameid + '&playerId=' + props.playerId;
         console.log(url)
         fetch(url, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            
+            method: 'POST', 
         })
             .then(async response => {
                 if (response.ok) {
                     props.gameIdCallBack(gameid);
-                    props.playerIdCallBack(2);
                 }
                 else {
                     const message = await response.text();
@@ -41,9 +36,6 @@ function JoinGame(props) {
             .catch(error => {
                 alert(error);
             });  
-        // REMOVE AFTER TESTING
-        props.gameIdCallBack(gameid);
-        props.playerIdCallBack(2);
     }
 
     return (
