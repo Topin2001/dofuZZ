@@ -141,27 +141,27 @@ class Game extends Component {
     gameStateUpdate = () => {
         setInterval(() => {
             console.log(this.state.API_URL + this.props.gameId);
-            fetch("http://localhost:8080/games/" + this.props.gameId + "/state?gameId=" + this.props.gameId, {
+            fetch(this.props.backendUrl + this.props.gameId + "/state?gameId=" + this.props.gameId, {
                 method: 'GET'
             })
                 .then(async (response) => {
                     if (response.ok){
                         const data = await response.json();
-                        // if (data.winner != -1){
-                        //     this.setState({winner: data.winner});
-                        //     console.log(data.winner);
-                        //     if (data.winner == this.state.playerId){
-                        //         console.log("You Win");
-                        //         this.setState({turn: "You Win"});
-                        //     }
-                        //     else{
-                        //         this.setState({turn: "You Lose"});
-                        //     }
-                        //     this.setState({gameState: "Game Over"});
-                        //     console.log("Game Over");
-                        // }
+                        if (data.winner != -1){
+                            this.setState({winner: data.winner});
+                            console.log(data.winner);
+                            if (data.winner == this.state.playerId){
+                                console.log("You Win");
+                                this.setState({turn: "You Win"});
+                            }
+                            else{
+                                this.setState({turn: "You Lose"});
+                            }
+                            this.setState({gameState: "Game Over"});
+                            console.log("Game Over");
+                        }
 
-                        // else {
+                        else {
                             // if (data.player1_id or data.player2_id null then this.setState({gameState: "Waiting for players"}))
                             if (data.player2_id == null){
                                 this.setState({gameState: "Waiting for players"});
@@ -177,7 +177,7 @@ class Game extends Component {
                             // turn is nb_turns % 2, if 0 then player1, if 1 then player2
                             const turn = data.nb_turns % 2 == 0 ? `Player ${data.player1_id} turn` : `Player ${data.player2_id} turn`;
                             this.setState({turn: this.state.gameState == "Waiting for players" ? "Waiting for players" : turn});
-                        // }                    
+                        }                    
                     }
                     else{
                         throw new Error("Error while fetching game state");
