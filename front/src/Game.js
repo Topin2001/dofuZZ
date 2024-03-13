@@ -141,7 +141,7 @@ class Game extends Component {
     gameStateUpdate = () => {
         setInterval(() => {
             console.log(this.state.API_URL + this.props.gameId);
-            fetch(this.props.backendUrl + this.props.gameId + "/state?gameId=" + this.props.gameId, {
+            fetch(this.props.API_URL + this.props.gameId + "/state?gameId=" + this.props.gameId, {
                 method: 'GET'
             })
                 .then(async (response) => {
