@@ -140,8 +140,9 @@ class Game extends Component {
 
     gameStateUpdate = () => {
         setInterval(() => {
-            console.log(this.state.API_URL + this.props.gameId);
-            fetch(this.state.API_URL + this.props.gameId + "/state?gameId=" + this.props.gameId, {
+            const path = this.state.API_URL + `/games/${this.props.gameId}/state?gameId=` + this.props.gameId;
+            console.log(path);
+            fetch(path, {
                 method: 'GET'
             })
                 .then(async (response) => {
@@ -187,7 +188,7 @@ class Game extends Component {
                     this.setState({error: error.message});
                 });
         }
-        , 1000);
+        , 500);
     };
 
     handleWindowResize = () => {
