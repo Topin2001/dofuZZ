@@ -36,33 +36,39 @@ class Board extends Component {
     }
 
 
-    hoverTiles(camera, character, actionType) {
+    hoverTiles(camera, character, actionType, hoverMode) {
         switch (actionType) {
             case 1:
                 this.hoverTilesMove(camera, character);
                 break;
             case 0:
-                this.hoverTilesAttack(camera, character);
+                this.hoverTilesAttack(camera, character, 1 + hoverMode);
                 break;
             default:
                 break;
         }
     }
 
-    hoverTilesAttack(camera, character) {
+    hoverTilesAttack(camera, character, range) {
         // show 3x3 range
+        this.tiles.children.forEach(tile => {
+            tile.material.color.set(0x00ff00);
+        });
         const charIndexes = { x: character.x, z: character.z };
         if (charIndexes.x !== -1 && charIndexes.z !== -1) {
             const x = charIndexes.x;
             const z = charIndexes.z;
-            const range = 1;
+
+            // color all tiles where abs(x - charIndexes.x) + abs(z - charIndexes.z) <= range
             for (let i = -range; i <= range; i++) {
                 for (let j = -range; j <= range; j++) {
-                    const tile = this.tiles.children.find(tile => tile.index.x === x + i && tile.index.z === z + j);
-                    if (tile) {
-                        // tile.material.color.set(0xff0000);
-                        // blue
-                        tile.material.color.set(0x0000ff);
+                    if (Math.abs(i) + Math.abs(j) <= range) {
+                        const tile = this.tiles.children.find(tile => tile.index.x === x + i && tile.index.z === z + j);
+                        if (tile) {
+                            // tile.material.color.set(0xff0000);
+                            // blue
+                            tile.material.color.set(0x0000ff);
+                        }
                     }
                 }
             }
@@ -83,6 +89,9 @@ class Board extends Component {
 
     hoverTilesMove(camera, character, actionType) {
         if (!character) return { x: -1, z: -1 };
+        this.tiles.children.forEach(tile => {
+            tile.material.color.set(0x00ff00);
+        });
         this.hoveredTiles.forEach(tileCoords => {
             const tile = this.tiles.children.find(tile => tile.index.x === tileCoords.x && tile.index.z === tileCoords.z);
             tile && tile.material.color.set(0x00ff00);

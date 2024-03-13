@@ -32,9 +32,11 @@ function CreateGame(props) {
                         }
                         throw new Error('Network response was not ok.');
                     })
+                    .then(response => response.json())
                     .then(e => {
-                        props.gameIdCallBack(data);
-                        console.log("gameId: " + data);
+                        props.gameIdCallBack(e.gameId);
+                        // set data.playerJwt as jwt cookie
+                        document.cookie = 'jwt=' + e.playerJwt;
                     })
                     .catch(error => alert(error));
             })

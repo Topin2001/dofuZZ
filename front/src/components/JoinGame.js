@@ -26,8 +26,10 @@ function JoinGame(props) {
         })
             .then(async response => {
                 if (response.ok) {
-                    const id = await response.text();
-                    props.gameIdCallBack(id);
+                    const data = await response.json();
+                    props.gameIdCallBack(data.gameId);
+                    // set data.playerJwt as jwt cookie
+                    document.cookie = 'jwt=' + data.playerJwt;
                 }
                 else {
                     const message = await response.text();

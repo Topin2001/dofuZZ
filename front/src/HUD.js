@@ -30,18 +30,12 @@ function HUD(props) {
         );
     }
 
-    function ShipsMenu(props) {
+    // function SpellsMenu that displays 2 spells that you can think of:)
+    function SpellsMenu(props) {
         return (
             <ListGroup as="ul" style={{zIndex: 1000, position: "absolute", top: "50%", left: "0%", transform: "translate(0%, -50%)", color:"white"}}>
-                {/* {Object.keys({}).map((mode, index) => {
-                    if (index > 0 && props.ships[index - 1]){
-                        const ship = props.ships[index - 1];
-                        let bgColor = props.hoverMode === index ? "lightblue" : "transparent";
-                        bgColor = ship.isSetup ? "#FFCCCB" : bgColor;
-                        const color = ship.isSetup ? "red" : "lightgreen";
-                        return (
-                            <ListGroup.Item as="li" key={index} style={{backgroundColor: bgColor, color: color}}>{mode}</ListGroup.Item>
-                        );}})} */}
+                <ListGroup.Item as="li" key={0} style={{backgroundColor: props.hoverMode === 0 ? "lightgreen" : "transparent", color: props.hoverMode === 0 ? "black" : "lightgreen"}}>Attack 1 (1 Range, 20 Damage)</ListGroup.Item>
+                <ListGroup.Item as="li" key={1} style={{backgroundColor: props.hoverMode === 1 ? "lightgreen" : "transparent", color: props.hoverMode === 1 ? "black" : "lightgreen"}}>Attack 2 (2 Range, 10 Damage)</ListGroup.Item>
             </ListGroup>
         );
     }
@@ -79,7 +73,7 @@ function HUD(props) {
     return (
         <>
             <Crosshair />
-            <ShipsMenu hoverMode={props.hoverMode} ships={props.ships} />
+            <SpellsMenu hoverMode={props.hoverMode} />
             <DashboardMenu playerId={props.playerId} gameId={props.gameId} errorMessage={props.errorMessage} gameState={props.gameState} turn={props.turn} />
         </>
     );

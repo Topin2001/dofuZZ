@@ -29,6 +29,7 @@ class Game extends Component {
         errorMessage: 'No error',
         gameState: 'Waiting for players',
         turn: 'Players take turns once all ships are placed',
+        otherPlayerId: null,
         endGame: false,
         API_URL: this.props.backendUrl,
         winner: null
@@ -99,8 +100,8 @@ class Game extends Component {
         });
 
 
-        this.playerCharacter = new Character({ scene: this.scene, position: new THREE.Vector3(0,0,0) ,modelPath: "Knight.glb" });
-        // this.ennemyCharacter = new Character({ scene: this.scene, position: new THREE.Vector3(0,0,0) ,modelPath: "Rogue_Hooded.glb" });
+        this.playerCharacter = new Character({ scene: this.scene, position: new THREE.Vector3(-100,0,-100) ,modelPath: "Knight.glb" });
+        this.ennemyCharacter = new Character({ scene: this.scene, position: new THREE.Vector3(-100,0,-100) ,modelPath: "Rogue_Hooded.glb" });
     };
 
 
@@ -130,13 +131,14 @@ class Game extends Component {
             this.controls(deltaTime);
             this.player.update(deltaTime);
             this.playerCharacter.update(deltaTime);
-            this.board.hoverTiles(this.camera, this.playerCharacter, this.player.actionType);
+            this.board.hoverTiles(this.camera, this.playerCharacter, this.player.actionType, this.player.hoverMode);
         }
 
         this.renderer.render(this.scene, this.camera.camera);
 
         this.requestID = window.requestAnimationFrame(this.startAnimationLoop);
     };
+
 
     gameStateUpdate = () => {
         setInterval(() => {
@@ -148,10 +150,23 @@ class Game extends Component {
                 .then(async (response) => {
                     if (response.ok){
                         const data = await response.json();
-                        if (data.winner != -1){
-                            this.setState({winner: data.winner});
-                            console.log(data.winner);
-                            if (data.winner == this.state.playerId){
+                        // data game has fields: player1_id, player2_id, winner, nb_turns, player1X, player1Y, player2X, player2Y, player1Life, player2Life
+
+                        if (data.game.player1_id == this.props.playerId){
+                            this.playerCharacter.moveToTile(data.game.player1X, data.game.player1Y);
+                            this.ennemyCharacter.moveToTile(data.game.player2X, data.game.player2Y);
+                        }
+
+                        else if (data.game.player2_id == this.props.playerId){
+                            this.playerCharacter.moveToTile(data.game.player2X, data.game.player2Y);
+                            this.ennemyCharacter.moveToTile(data.game.player1X, data.game.player1Y);
+                        }
+
+
+                        if (data.game.winner != -1){
+                            this.setState({winner: data.game.winner});
+                            console.log(data.game.winner);
+                            if (data.game.winner == this.state.playerId){
                                 console.log("You Win");
                                 this.setState({turn: "You Win"});
                             }
@@ -163,11 +178,10 @@ class Game extends Component {
                         }
 
                         else {
-                            // if (data.player1_id or data.player2_id null then this.setState({gameState: "Waiting for players"}))
-                            if (data.player2_id == null){
+                            if (data.game.player2_id == null){
                                 this.setState({gameState: "Waiting for players"});
                             }
-                            else if (data.player1_id == null){
+                            else if (data.game.player1_id == null){
                                 this.setState({gameState: "Something went wrong, please start a new game"});
                             }
                             else {
@@ -188,7 +202,7 @@ class Game extends Component {
                     this.setState({error: error.message});
                 });
         }
-        , 500);
+        , 2000);
     };
 
     handleWindowResize = () => {
@@ -225,15 +239,23 @@ class Game extends Component {
 
     keyDownListener = (event) => {
         this.keyStates[event.code] = true;
+        if (event.code == 'KeyQ') {
+            this.player.actionType = (this.player.actionType + 1) % 2;
+        }
+        if (event.code == 'Digit1') {
+            this.player.hoverMode = 0;
+        }
+        if (event.code == 'Digit2') {
+            this.player.hoverMode = 1;
+        }
     };
 
     keyUpListener = (event) => {
         this.keyStates[event.code] = false;
-        // if (event.code == 'KeyE') {
-        //     shipSelection = 0;
-        // }
+
         this.setState({ hoverMode: this.player.hoverMode });
     };
+
 
     clickDownListener = () => {
         document.body.requestPointerLock();
@@ -265,7 +287,23 @@ class Game extends Component {
             else if (this.player.actionType == 0) {
                 const targetedTile = this.board.getPointedTile(this.camera);
                 // request to check if the tile is in range etc...
-                this.playerCharacter.attackTile(targetedTile, 0);
+                const jwt = document.cookie.split('; ').find(row => row.startsWith('jwt=')).split('=')[1];
+                fetch(this.state.API_URL + `/players/${this.props.playerId}/attack?targetPosX=${targetedTile.x}&targetPosY=${targetedTile.z}&playerJwt=${jwt}&spellId=${this.player.hoverMode +1}`, {
+                    method: 'POST'
+                })
+                .then(async response => {
+                    if (response.ok) {
+                        this.playerCharacter.attackTile(targetedTile, this.player.hoverMode);
+                    }
+                    else {
+                        await response.text().then(text => {
+                            throw new Error(text);
+                        });
+                    }
+                })
+                .catch(error => {
+                    this.setState({errorMessage: error.message});
+                });
             }
         };
     };

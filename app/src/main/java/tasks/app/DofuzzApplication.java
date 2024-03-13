@@ -60,16 +60,16 @@ public class DofuzzApplication implements CommandLineRunner {
                         jdbcTemplate.execute("CREATE TABLE players(" +
                                         "id SERIAL, player_name VARCHAR(255), password VARCHAR(255), gameid SERIAL, posX INTEGER, posY INTEGER, life INTEGER, creation_date TIMESTAMP)");
                         jdbcTemplate.execute("CREATE TABLE games(" +
-                                        "id SERIAL, code VARCHAR(255), creation_date TIMESTAMP, player1_id INTEGER, player2_id INTEGER, nb_turns INTEGER, winner INTEGER)");
+                                        "id SERIAL, code VARCHAR(255), creation_date TIMESTAMP, player1_id INTEGER, player1X INTEGER, player1Y INTEGER, player1Life INTEGER, player2_id INTEGER, player2X INTEGER, player2Y INTEGER, player2Life INTEGER, nb_turns INTEGER, winner INTEGER)");
                         jdbcTemplate.execute("CREATE TABLE spells(" +
-                                        "id SERIAL, spell_name VARCHAR(255), damage INTEGER, range INTEGER)");
+                                        "id SERIAL, name VARCHAR(255), damage INTEGER, range INTEGER)");
                         jdbcTemplate.execute("CREATE TABLE tokens(" +
                                         "token_id SERIAL, token VARCHAR(255))");
 
-                        jdbcTemplate.update("INSERT INTO spells(spell_name, damage, cost) VALUES(?, ?, ?)", "Fireball",
-                                        10, 2);
-                        jdbcTemplate.update("INSERT INTO spells(spell_name, damage, cost) VALUES(?, ?, ?)", "Forst", 5,
+                        jdbcTemplate.update("INSERT INTO spells(name, damage, range) VALUES(?, ?, ?)", "Forst", 20,
                                         1);
+                        jdbcTemplate.update("INSERT INTO spells(name, damage, range) VALUES(?, ?, ?)", "Fireball",
+                                        10, 2);
 
                 }
         }

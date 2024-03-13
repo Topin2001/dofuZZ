@@ -18,6 +18,7 @@ class Player extends Component {
         this.velocity = new THREE.Vector3();
         this.mode = modes.MOVE;
         this.actionType = 1;
+        this.hoverMode = 0;
     }
 
     update( deltaTime ) {

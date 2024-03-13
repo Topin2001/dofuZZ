@@ -61,10 +61,11 @@ public class IndexController {
     if (player == null) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Player not found");
     }
-    Game game = gameRepository.findById(player.getGameId()).orElse(null);
+    Game game = gameRepository.findById(player.getGameIdFromJwt(playerJwt)).orElse(null);
     if (game == null) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Game not found");
     }
+    boolean isPlayer1 = game.getPlayer1_id().equals(playerId);
     // Check the tour of game
     if (game.getNb_turns() % 2 != (game.getPlayer1_id().equals(playerId) ? 0 : 1)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Not your turn");
@@ -72,8 +73,9 @@ public class IndexController {
     game.setNb_turns(game.getNb_turns() + 1);
 
     // Calculate the total distance moved
-    int totalDistance = Math.abs(player.getPosX() - posX) + Math.abs(player.getPosY() - posY);
-    
+    // int totalDistance = Math.abs(player.getPosX() - posX) + Math.abs(player.getPosY() - posY);
+    int totalDistance = isPlayer1 ? Math.abs(game.getPlayer1X() - posX) + Math.abs(game.getPlayer1Y() - posY) : Math.abs(game.getPlayer2X() - posX) + Math.abs(game.getPlayer2Y() - posY);
+
     // Check if the total distance moved is more than 5 tiles
     if (totalDistance > 5) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Can't move more than 5 tiles");
@@ -84,9 +86,15 @@ public class IndexController {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid move");
     }
 
-    player.setPosX(posX);
-    player.setPosY(posY);
-    playerRepository.save(player);
+    if (isPlayer1) {
+        game.setPlayer1X(posX);
+        game.setPlayer1Y(posY);
+    } else {
+        game.setPlayer2X(posX);
+        game.setPlayer2Y(posY);
+    }
+
+    gameRepository.save(game);
 
     return ResponseEntity.ok().build();
 }
@@ -108,7 +116,8 @@ public class IndexController {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Player not found");
     }
 
-    Game game = gameRepository.findById(player.getGameId()).orElse(null);
+    Game game = gameRepository.findById(player.getGameIdFromJwt(playerJwt)).orElse(null);
+    boolean isPlayer1 = game.getPlayer1_id().equals(playerId);
     if (game == null) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Game not found");
     }
@@ -137,13 +146,26 @@ public class IndexController {
     }
 
     // Check if player is in range of spell
-    if (Math.abs(player.getPosX() - targetPosX) > spell.getRange() || Math.abs(player.getPosY() - targetPosY) > spell.getRange()) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Target player is out of range");
-    }
+    if (isPlayer1) {
+        if (Math.abs(game.getPlayer1X() - targetPosX) + Math.abs(game.getPlayer1Y() - targetPosY) > spell.getRange()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Target player is out of range");
+        }
 
-    targetPlayer.setLife(targetPlayer.getLife() - spell.getDamage());
-    if (targetPlayer.getLife() <= 0) {
-      game.setWinner(playerId);
+        // give damage to target player
+        game.setPlayer2Life(game.getPlayer2Life() - spell.getDamage());
+        if (game.getPlayer2Life() <= 0) {
+            game.setWinner(playerId);
+        }
+    } else {
+        if (Math.abs(game.getPlayer2X() - targetPosX) + Math.abs(game.getPlayer2Y() - targetPosY) > spell.getRange()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Target player is out of range");
+        }
+
+        // give damage to target player
+        game.setPlayer1Life(game.getPlayer1Life() - spell.getDamage());
+        if (game.getPlayer1Life() <= 0) {
+            game.setWinner(playerId);
+        }
     }
 
     // Update the number of turns
@@ -167,14 +189,24 @@ public class IndexController {
     return ResponseEntity.ok().body(gameRepository.findById(gameId).orElse(null));
   }
 
+  static class GameState {
+    public Game game;
+    public Player player1;
+    public Player player2;
+  }
+
   @GetMapping(path = "/games/{gameId}/state")
   public ResponseEntity<?> getGameState(@RequestParam Long gameId) {
     Game game = gameRepository.findById(gameId).orElse(null);
     if (game == null) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Game not found");
     }
-      // return the game
-        return ResponseEntity.ok().body(game);
+      // return the game and player positions
+      GameState gameState = new GameState();
+      gameState.game = game;
+      gameState.player1 = game.player1_id == null ? null : playerRepository.findById(game.player1_id).orElse(null);
+      gameState.player2 = game.player2_id == null ? null : playerRepository.findById(game.player2_id).orElse(null);
+      return ResponseEntity.ok().body(gameState);
   }
 
 
@@ -183,26 +215,35 @@ public class IndexController {
     return ResponseEntity.ok().body(playerRepository.findById(playerId).orElse(null));
   }
 
+  // struc
+  public class JoinGameReturn {
+    public Long gameId;
+    public String playerJwt;
+  } 
+
     // Add a player to a game using its code, the player using this route is the player 2
-    @PostMapping(path = "/games/join")
-    public ResponseEntity<?> joinGame(@RequestParam String code, @RequestParam Long playerId) {
-        Game game = gameRepository.findByCode(code);
-        if (game == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Game not found");
-        }
-        if (game.getPlayer2_id() != null) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Game is full");
-        }
-        Player player = playerRepository.findById(playerId).orElse(null);
-        if (player == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Player not found");
-        }
-        game.setPlayer2_id(playerId);
-        gameRepository.save(game);
-        player.setGameId(game.getId());
-        playerRepository.save(player);
-        return ResponseEntity.status(HttpStatus.CREATED).body(game.getId());
+  @PostMapping(path = "/games/join")
+  public ResponseEntity<?> joinGame(@RequestParam String code, @RequestParam Long playerId) {
+    Game game = gameRepository.findByCode(code);
+    if (game == null) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Game not found");
     }
+    if (game.getPlayer2_id() != null) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Game is full");
+    }
+    Player player = playerRepository.findById(playerId).orElse(null);
+    if (player == null) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Player not found");
+    }
+    game.addPlayer(playerId);
+
+    gameRepository.save(game);
+
+    JoinGameReturn joinGameReturn = new JoinGameReturn();
+    joinGameReturn.gameId = game.getId();
+    joinGameReturn.playerJwt = player.jwtToken(game.getId());
+    return ResponseEntity.status(HttpStatus.CREATED).body(joinGameReturn);
+  }
 
   @PostMapping(path = "/games/{gameId}/players/{playerId}")
   public ResponseEntity<?> addPlayerToGame(@RequestParam Long gameId, @RequestParam Long playerId) {
@@ -216,9 +257,11 @@ public class IndexController {
     }
     game.addPlayer(playerId);
     gameRepository.save(game);
-    player.setGameId(gameId);
-    playerRepository.save(player);
-    return ResponseEntity.status(HttpStatus.CREATED).build();
+
+    JoinGameReturn joinGameReturn = new JoinGameReturn();
+    joinGameReturn.gameId = game.getId();
+    joinGameReturn.playerJwt = player.jwtToken(game.getId());
+    return ResponseEntity.status(HttpStatus.CREATED).body(joinGameReturn);
   }
 
   public static class PlayerRegistrationRequest {
@@ -253,7 +296,7 @@ public class IndexController {
     } else {
       Player player = new Player(request.getUsername(), request.getPassword());
       playerRepository.save(player);
-      return ResponseEntity.status(HttpStatus.CREATED).body(player.jwtToken());
+      return ResponseEntity.status(HttpStatus.CREATED).body(player.jwtToken(-1L));
     }
   }
 
@@ -266,6 +309,6 @@ public class IndexController {
     if (!player.getPassword().equals(request.getPassword())) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Wrong password");
     }
-    return ResponseEntity.ok().body(player.jwtToken());
+    return ResponseEntity.ok().body(player.jwtToken(-1L));
   }
 }

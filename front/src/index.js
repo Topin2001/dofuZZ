@@ -53,7 +53,7 @@ function Menu() {
         const jwtToken = jwt.split('=')[1];
         const payload = jwtToken.split('.')[1];
         const decodedPayload = atob(payload);
-        const username = JSON.parse(decodedPayload).username;
+        const username = JSON.parse(decodedPayload).name;
         return username;
     }
 

@@ -9,13 +9,13 @@ import jakarta.persistence.Table;
 
 
 @Entity
-@Table(name="spell") 
+@Table(name="spells") 
 public class Spell {
 
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "spell_id")
+    @Column(name = "id")
     private Long id;
     @Column(name = "range")
     private int range;

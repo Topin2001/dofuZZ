@@ -20,7 +20,7 @@ export default class Character extends Component {
             props.modelPath,
             (gltf) => {
                 gltf.scene.scale.set(5, 5, 5);
-                gltf.scene.position.set(0, 0, 0);
+                gltf.scene.position.set(this.props.position.x, this.props.position.y, this.props.position.z);
                 this.props.scene.add(gltf.scene);
                 this.gltf = gltf.scene;
                 this.mixer = new THREE.AnimationMixer(this.gltf);

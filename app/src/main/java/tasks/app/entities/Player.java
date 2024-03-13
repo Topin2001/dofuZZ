@@ -131,13 +131,14 @@ public class Player {
         this.life = life;
     }
 
-    public String jwtToken() {
+    public String jwtToken(Long gameId) {
 
         final String SECRET_KEY = "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF";
         
         String jwtToken = Jwts.builder()
                 .claim("name", name) // Using username as the subject
                 .claim("playerId", id) // Adding playerId as a claim
+                .claim("gameId", gameId) // Adding gameId as a claim
                 .setIssuedAt(new Date())
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
                 .compact();
@@ -168,6 +169,20 @@ public class Player {
                     .build()
                     .parseClaimsJws(jwtToken);
             return Long.parseLong(claims.getBody().get("playerId").toString());
+        } catch (Exception e) {
+            throw new RuntimeException("Could not parse JWT token", e);
+        }
+    }
+
+    public static Long getGameIdFromJwt (String jwtToken){
+        final String SECRET_KEY = "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF";
+
+        try {
+            Jws<Claims> claims = Jwts.parserBuilder()
+                    .setSigningKey(SECRET_KEY)
+                    .build()
+                    .parseClaimsJws(jwtToken);
+            return Long.parseLong(claims.getBody().get("gameId").toString());
         } catch (Exception e) {
             throw new RuntimeException("Could not parse JWT token", e);
         }
