@@ -26,7 +26,8 @@ function JoinGame(props) {
         })
             .then(async response => {
                 if (response.ok) {
-                    props.gameIdCallBack(gameid);
+                    const id = await response.text();
+                    props.gameIdCallBack(id);
                 }
                 else {
                     const message = await response.text();

@@ -167,6 +167,17 @@ public class IndexController {
     return ResponseEntity.ok().body(gameRepository.findById(gameId).orElse(null));
   }
 
+  @GetMapping(path = "/games/{gameId}/state")
+  public ResponseEntity<?> getGameState(@RequestParam Long gameId) {
+    Game game = gameRepository.findById(gameId).orElse(null);
+    if (game == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Game not found");
+    }
+      // return the game
+        return ResponseEntity.ok().body(game);
+  }
+
+
   @GetMapping(path = "/players/{playerId}")
   public ResponseEntity<?> getPlayer(@RequestParam Long playerId) {
     return ResponseEntity.ok().body(playerRepository.findById(playerId).orElse(null));

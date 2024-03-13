@@ -139,81 +139,55 @@ class Game extends Component {
     };
 
     gameStateUpdate = () => {
-        // setInterval(() => {
-        //     console.log(this.state.API_URL + this.props.gameId);
-        //     fetch(this.state.API_URL + this.props.gameId, {
-        //         method: 'GET'
-        //     })
-        //         .then(async (response) => {
-        //             if (response.ok){
-        //                 const data = await response.json();
-        //                 if (data.winner != 0){
-        //                     this.setState({winner: data.winner});
-        //                     console.log(data.winner);
-        //                     if (data.winner == this.state.playerId){
-        //                         console.log("You Win");
-        //                         this.setState({turn: "You Win"});
-        //                     }
-        //                     else{
-        //                         this.setState({turn: "You Lose"});
-        //                     }
-        //                     this.setState({gameState: "Game Over"});
-        //                     console.log("Game Over");
-        //                 }
+        setInterval(() => {
+            console.log(this.state.API_URL + this.props.gameId);
+            fetch("http://localhost:8080/games/" + this.props.gameId + "/state?gameId=" + this.props.gameId, {
+                method: 'GET'
+            })
+                .then(async (response) => {
+                    if (response.ok){
+                        const data = await response.json();
+                        // if (data.winner != -1){
+                        //     this.setState({winner: data.winner});
+                        //     console.log(data.winner);
+                        //     if (data.winner == this.state.playerId){
+                        //         console.log("You Win");
+                        //         this.setState({turn: "You Win"});
+                        //     }
+                        //     else{
+                        //         this.setState({turn: "You Lose"});
+                        //     }
+                        //     this.setState({gameState: "Game Over"});
+                        //     console.log("Game Over");
+                        // }
 
-        //                 if (data.isBuildPhase){
-        //                     if (data.player1Id != 0 && data.player2Id != 0){
-        //                         this.setState({gameState: "Building Phase"});
-        //                     }
-        //                 }
+                        // else {
+                            // if (data.player1_id or data.player2_id null then this.setState({gameState: "Waiting for players"}))
+                            if (data.player2_id == null){
+                                this.setState({gameState: "Waiting for players"});
+                            }
+                            else if (data.player1_id == null){
+                                this.setState({gameState: "Something went wrong, please start a new game"});
+                            }
+                            else {
+                                this.setState({gameState: "Game in progress"});
+                            }
 
-        //                 if (!data.isBuildPhase){
-        //                     this.setState({gameState: "Attacking Phase"});
-        //                     this.player.mode = 0;
-        //                     if (data.isPlayer1Turn){
-        //                         if (this.state.playerId == 1){
-        //                             this.setState({turn: "Your Turn"});
 
-        //                         }
-        //                         else{
-        //                             this.setState({turn: "Opponent Turn"});
-        //                         }
-        //                     }
-        //                     else {
-        //                         if (this.state.playerId == 2){
-        //                             this.setState({turn: "Your Turn"});
-        //                         }
-        //                         else{
-        //                             this.setState({turn: "Opponent Turn"});
-        //                         }
-        //                     }
-        //                 }                    
-        //             }
-        //             else{
-        //                 throw new Error("Error while fetching game state");
-        //             }
-        //         })
-        //         .catch((error) => {
-        //             this.setState({error: error.message});
-        //         });
-
-        //     fetch(this.state.API_URL + this.props.gameId + "/board?playerId=" + this.state.playerId, {
-        //         method: 'GET'
-        //     })
-        //         .then(async (response) => {
-        //             if (response.ok){
-        //                 const data = await response.json();
-        //                 console.log(data);
-        //                 this.board.updateBoard(data);
-        //             }
-        //             else{
-        //                 throw new Error("Error while fetching board state");
-        //             }
-        //         })
-        //         .catch((error) => {
-        //             this.setState({error: error.message});
-        //         });
-        //     }, 5000);
+                            // turn is nb_turns % 2, if 0 then player1, if 1 then player2
+                            const turn = data.nb_turns % 2 == 0 ? `Player ${data.player1_id} turn` : `Player ${data.player2_id} turn`;
+                            this.setState({turn: this.state.gameState == "Waiting for players" ? "Waiting for players" : turn});
+                        // }                    
+                    }
+                    else{
+                        throw new Error("Error while fetching game state");
+                    }
+                })
+                .catch((error) => {
+                    this.setState({error: error.message});
+                });
+        }
+        , 1000);
     };
 
     handleWindowResize = () => {
