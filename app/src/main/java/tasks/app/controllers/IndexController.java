@@ -30,6 +30,9 @@ public class IndexController {
   @Autowired
   private PlayerRepository playerRepository;
 
+  @Autowired 
+  private SpellRepository SpellRepository;
+
   @CrossOrigin
   @GetMapping(path = { "/", "/games" })
   public ResponseEntity<?> getAllGames(Model model) {
@@ -101,9 +104,8 @@ public class IndexController {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Not your turn");
     }
 
-    // Check if spellName is provided
-    if (spellId == 0) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No spell provided");
+    if (spellId == null) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No spell id provided");
     }
 
     // Find the spell
@@ -132,6 +134,7 @@ public class IndexController {
 
     // Save the changes
     playerRepository.save(player);
+    playerRepository.save(targetPlayer);
 
     return ResponseEntity.ok().build();
   }
