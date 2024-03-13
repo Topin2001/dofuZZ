@@ -242,7 +242,25 @@ class Game extends Component {
     clickUpListener() {
         if (document.pointerLockElement !== null) {
             if (this.player.actionType == 1) {
-                this.playerCharacter.moveToTile(this.board.getPointedTile(this.camera).x, this.board.getPointedTile(this.camera).z);
+                // request to backend to endpoint /players/move?posX=...&posY (posY is posZ in 3D world) and jwt token
+                // get jwt from cookies
+                const jwt = document.cookie.split('; ').find(row => row.startsWith('jwt=')).split('=')[1];
+                fetch(this.state.API_URL + `/players/move?posX=${this.board.getPointedTile(this.camera).x}&posY=${this.board.getPointedTile(this.camera).z}&playerJwt=${jwt}`, {
+                    method: 'POST'
+                })
+                .then(async response => {
+                    if (response.ok) {
+                        this.playerCharacter.moveToTile(this.board.getPointedTile(this.camera).x, this.board.getPointedTile(this.camera).z);
+                    }
+                    else {
+                        await response.text().then(text => {
+                            throw new Error(text);
+                        });
+                    }
+                })
+                .catch(error => {
+                    this.setState({errorMessage: error.message});
+                });
             }
             else if (this.player.actionType == 0) {
                 const targetedTile = this.board.getPointedTile(this.camera);

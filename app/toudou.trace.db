@@ -2760,3 +2760,11 @@ org.h2.jdbc.JdbcSQLNonTransientException: The object is already closed [90007-22
 org.h2.jdbc.JdbcSQLNonTransientException: The object is already closed [90007-224]
 2024-03-13 11:34:52.854578+01:00 jdbc[14]: exception
 org.h2.jdbc.JdbcSQLNonTransientException: The object is already closed [90007-224]
+2024-03-13 11:39:18.067213+01:00 jdbc[14]: exception
+org.h2.jdbc.JdbcSQLNonTransientException: The object is already closed [90007-224]
+2024-03-13 11:39:20.535432+01:00 jdbc[16]: exception
+org.h2.jdbc.JdbcSQLNonTransientException: The object is already closed [90007-224]
+2024-03-13 11:45:48.160803+01:00 jdbc[16]: exception
+org.h2.jdbc.JdbcSQLNonTransientException: The object is already closed [90007-224]
+2024-03-13 11:46:04.207762+01:00 jdbc[18]: exception
+org.h2.jdbc.JdbcSQLNonTransientException: The object is already closed [90007-224]

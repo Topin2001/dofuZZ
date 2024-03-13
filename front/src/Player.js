@@ -17,7 +17,7 @@ class Player extends Component {
         this.direction = new THREE.Vector3();
         this.velocity = new THREE.Vector3();
         this.mode = modes.MOVE;
-        this.actionType = 0;
+        this.actionType = 1;
     }
 
     update( deltaTime ) {
