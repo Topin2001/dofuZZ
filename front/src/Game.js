@@ -155,11 +155,15 @@ class Game extends Component {
                         if (data.game.player1_id == this.props.playerId){
                             this.playerCharacter.moveToTile(data.game.player1X, data.game.player1Y);
                             this.ennemyCharacter.moveToTile(data.game.player2X, data.game.player2Y);
+                            this.ennemyCharacter.updateHpBar(data.game.player2Life);
+                            this.playerCharacter.updateHpBar(data.game.player1Life);
                         }
 
                         else if (data.game.player2_id == this.props.playerId){
                             this.playerCharacter.moveToTile(data.game.player2X, data.game.player2Y);
                             this.ennemyCharacter.moveToTile(data.game.player1X, data.game.player1Y);
+                            this.ennemyCharacter.updateHpBar(data.game.player1Life);
+                            this.playerCharacter.updateHpBar(data.game.player2Life);
                         }
 
 

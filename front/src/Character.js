@@ -24,6 +24,14 @@ export default class Character extends Component {
                 this.props.scene.add(gltf.scene);
                 this.gltf = gltf.scene;
                 this.mixer = new THREE.AnimationMixer(this.gltf);
+                // add hp bar
+                const hpBarGeometry = new THREE.PlaneGeometry(1, 0.1);
+                const hpBarMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+                const hpBar = new THREE.Mesh(hpBarGeometry, hpBarMaterial);
+                hpBar.position.set(0, 3, 0);
+                hpBar.name = "hpBar";
+                this.gltf.add(hpBar);
+            
 
                 if (props.modelPath === "Knight.glb" || props.modelPath === "Rogue_Hooded.glb") {
                     this.runAction = this.mixer.clipAction(gltf.animations[48]);
@@ -44,14 +52,6 @@ export default class Character extends Component {
                             this.attackAction.timeScale = 10;
                             break;
                     }
-
-                    // hp bar
-                    // const geometry = new THREE.PlaneGeometry(1, 0.1); needs to be proportional to the hp
-                    const geometry = new THREE.PlaneGeometry(1 * this.hp / 100, 0.1);
-                    const material = new THREE.MeshBasicMaterial({ color: 0xff0000, side: THREE.DoubleSide });
-                    const plane = new THREE.Mesh(geometry, material);
-                    plane.position.set(0, 3, 0);
-                    plane.name = "hpBar";
                 }
                 else {
                     // scale x2
@@ -64,23 +64,13 @@ export default class Character extends Component {
                     this.runAction = this.mixer.clipAction(gltf.animations[48]);
                     this.attackAction.push(this.mixer.clipAction(gltf.animations[0]));
 
-                    // hp bar
-                    // const geometry = new THREE.PlaneGeometry(1, 0.1); needs to be proportional to the hp
-                    const geometry = new THREE.PlaneGeometry(1 * this.hp / 100, 0.1);
-                    const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-                    const plane = new THREE.Mesh(geometry, material);
-                    plane.position.set(0, 3, 0);
-                    plane.name = "hpBar";
-
-                    // gltf.scene.add( this.hitBox );
-                    this.hitBox.name = "hitBox";
+                    gltf.scene.add( this.hitBox );
                     this.props.scene.add( this.hitBox );
 
                     this.runAction.clampWhenFinished = true;
                     this.runAction.loop = THREE.LoopRepeat;
                     this.runAction.setDuration(0.1);
                     this.runAction.play();
-                    gltf.scene.add(plane);
                 }
             }
         );
@@ -150,6 +140,11 @@ export default class Character extends Component {
         if (this.mixer) {
             this.mixer.update(deltaTime);
         }
+    }
+
+    updateHpBar(hp) {
+        const hpBar = this.gltf?.getObjectByName("hpBar");
+        hpBar.geometry = new THREE.PlaneGeometry(1 * hp / 100, 0.1);
     }
 
     takeDamage(damage) {
