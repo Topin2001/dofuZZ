@@ -194,7 +194,7 @@ class Game extends Component {
 
 
                             // turn is nb_turns % 2, if 0 then player1, if 1 then player2
-                            const turn = data.nb_turns % 2 == 0 ? `${data.player1.name} turn` : `${data.player2.name} turn`;
+                            const turn = data.game.nb_turns % 2 == 0 ? `${data.player1.name} turn` : `${data.player2.name} turn`;
                             this.setState({turn: this.state.gameState == "Waiting for players" ? "Waiting for players" : turn});
                         }                    
                     }
